@@ -66,7 +66,8 @@ public partial class ChessPiece : Sprite2D
 			tempPos = tileMap.FromGlobalPosToTile((Vector2I)tempPos);
 			tempPos = tileMap.FromTileToGlobalPos((Vector2I)tempPos);
 			
-			if(isValidMove(tempPos) && !isCollision(tempPos))
+			
+			if(isValidMove(tempPos) && !isCollision(tempPos) /*!isPieceInTheWay(tempPos)*/ )
 			{
 				this.Position = tempPos;
 				placeInTileCallCount--;
@@ -122,7 +123,7 @@ public partial class ChessPiece : Sprite2D
 				{
 					Vector2I pieceTile = tileMap.FromGlobalPosToTile((Vector2I)chessPiece.Position);
 					Vector2I tempTile = tileMap.FromGlobalPosToTile((Vector2I)tempPos);
-					if(tempTile.X == pieceTile.X && tempTile.Y== pieceTile.Y)
+					if(tempTile.X == pieceTile.X && tempTile.Y == pieceTile.Y)
 					{
 						return true;
 					}
@@ -131,6 +132,11 @@ public partial class ChessPiece : Sprite2D
 			}
 			
 		}
+		return false;
+	}
+	//TODO
+	public bool isPieceInTheWay(Vector2 tempPos)
+	{
 		return false;
 	}
 	

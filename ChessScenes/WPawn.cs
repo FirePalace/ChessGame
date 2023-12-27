@@ -45,7 +45,7 @@ public partial class WPawn : ChessPiece
 				hasMoved = true;
 				return true;
 			}
-			if(!isWhite && (tempTile.Y - prevTile.Y) == -2 && hasMoved == false)
+			if(!isWhite && (tempTile.Y - prevTile.Y) == 2 && hasMoved == false)
 			{
 				hasMoved = true;
 				return true;
