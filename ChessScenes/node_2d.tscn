@@ -11926,7 +11926,7 @@ texture = ExtResource("2_7tjy1")
 script = ExtResource("4_65a2u")
 
 [node name="WPawn" type="Sprite2D" parent="."]
-position = Vector2(124, 68)
+position = Vector2(280, 40)
 scale = Vector2(0.125, 0.125)
 texture = ExtResource("6_liopi")
 script = ExtResource("7_un00v")

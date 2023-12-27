@@ -30,15 +30,15 @@ public partial class TileMap : Godot.TileMap
 
 		Sprite2D wKing = node2D.GetNode<Sprite2D>("WKing");
 		Sprite2D bKing = new WKing();
-
-
-
+		
 		for (int i = 0; i < 8; i++)
 		{
-			Sprite2D wPawn = new WPawn();
-			Sprite2D bPawn = new WPawn();
+			ChessPiece wPawn = new WPawn();
+			ChessPiece bPawn = new WPawn();
+			bPawn.isWhite = false;
 			SpawnPiece(wPawn,"wPawn", "white-pawn", new Vector2I(0+i,6));
 			SpawnPiece(bPawn,"bPawn", "black-pawn", new Vector2I(0+i,1));
+
 		}
 		
 		
@@ -63,7 +63,6 @@ public partial class TileMap : Godot.TileMap
 		wKing.Position = FromTileToGlobalPos(new Vector2I(4,7));
 		SpawnPiece(bKing, "bKing", "black-king", new Vector2I(4,0));
 	}
-
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
 	public override void _Process(double delta)
 	{
