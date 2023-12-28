@@ -35,4 +35,8 @@ public partial class WKnight : ChessPiece
 		}
 		return false;
 	}
+    public override bool isPieceInTheWay(Vector2 tempPos)
+    {
+        return false;
+    }
 }

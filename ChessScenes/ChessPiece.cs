@@ -1,14 +1,17 @@
 using Godot;
+using Godot.Collections;
 using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 
 public partial class ChessPiece : Sprite2D
 {
 	public TileMap tileMap;
-	bool IsDragging = false;
+	dragState IsDragging = dragState.unknown;
 	int placeInTileCallCount;
 	public Vector2I prevTile;
 	public bool isWhite = true;
+	public static bool isWhitesTurn = true;
 	Node2D node2D;
 
 	
@@ -46,38 +49,64 @@ public partial class ChessPiece : Sprite2D
 
 		
 
-		if (IsDragging)
+		if (IsDragging == dragState.isDragging)
 		{
 				
 			this.Position = MousePos;
 		}
 		
 			// OutofBounds
-		if (!inBounds.HasPoint(this.Position) && !IsDragging)
+		if (!inBounds.HasPoint(this.Position) && IsDragging == dragState.isNotDragging && viewport.HasPoint(this.Position))
 		{
 			//this.Position = tileMap.FromTileToGlobalPos(new Vector2I (3,3));
 			this.Position = tileMap.FromTileToGlobalPos(prevTile);
 		}
 		
 			// Place inside a Tile
-		if(inBounds.HasPoint(this.Position) && !IsDragging && placeInTileCallCount == 1)
+		if(inBounds.HasPoint(this.Position) && IsDragging == dragState.isNotDragging && placeInTileCallCount == 1)
 		{
 			Vector2 tempPos = this.Position;
 			tempPos = tileMap.FromGlobalPosToTile((Vector2I)tempPos);
 			tempPos = tileMap.FromTileToGlobalPos((Vector2I)tempPos);
 			
-			
-			if(isValidMove(tempPos) && !isCollision(tempPos) /*!isPieceInTheWay(tempPos)*/ )
+			if(isWhitesTurn)
 			{
-				this.Position = tempPos;
-				placeInTileCallCount--;
-				GD.Print("tempPos: " + tempPos);
-				GD.Print("prevTile: " + prevTile);
+				if(isValidMove(tempPos) && !isCollision(tempPos) && !isPieceInTheWay(tempPos) && this.isWhite == true)
+				{
+					this.Position = tempPos;
+					placeInTileCallCount--;
+					GD.Print("tempPos: " + tempPos);
+					GD.Print("prevTile: " + prevTile);
+					isWhitesTurn = false;
+		
+				}
+				else
+				{
+					this.Position = tileMap.FromTileToGlobalPos(prevTile);
+				}
 			}
 			else
 			{
-				this.Position = tileMap.FromTileToGlobalPos(prevTile);
+				if(isValidMove(tempPos) && !isCollision(tempPos) &&  !isPieceInTheWay(tempPos) && this.isWhite == false)
+				{
+					this.Position = tempPos;
+					placeInTileCallCount--;
+					GD.Print("tempPos: " + tempPos);
+					GD.Print("prevTile: " + prevTile);
+					isWhitesTurn = true;
+		
+				}
+				else
+				{
+					this.Position = tileMap.FromTileToGlobalPos(prevTile);
+				}
+
 			}
+			
+		}
+		if(IsDragging == dragState.isNotDragging)
+		{
+			IsDragging = dragState.unknown;
 		}
 	}
     public override void _Input(InputEvent @event)
@@ -88,13 +117,13 @@ public partial class ChessPiece : Sprite2D
 			
 			if(tileMap.FromGlobalPosToTile((Vector2I)this.Position) == tileMap.FromGlobalPosToTile((Vector2I)GetGlobalMousePosition()))
 			{
-				if(IsDragging && !inputEventMouseButton.IsPressed())
+				if(IsDragging == dragState.isDragging && !inputEventMouseButton.IsPressed())
 				{
-				IsDragging = false;
+				IsDragging = dragState.isNotDragging;
 				}
 				else if(inputEventMouseButton.IsPressed())
 				{
-				IsDragging = true;
+				IsDragging = dragState.isDragging;
 				placeInTileCallCount = 1;
 				PrevTile();
 				}
@@ -122,7 +151,7 @@ public partial class ChessPiece : Sprite2D
 				if(chessPiece != this)
 				{
 					Vector2I pieceTile = tileMap.FromGlobalPosToTile((Vector2I)chessPiece.Position);
-					Vector2I tempTile = tileMap.FromGlobalPosToTile((Vector2I)tempPos);
+					Vector2I tempTile = tileMap.FromGlobalPosToTile((Vector2I)tempPos);				
 					if(tempTile.X == pieceTile.X && tempTile.Y == pieceTile.Y)
 					{
 						return true;
@@ -134,10 +163,63 @@ public partial class ChessPiece : Sprite2D
 		}
 		return false;
 	}
-	//TODO
-	public bool isPieceInTheWay(Vector2 tempPos)
+
+	public enum dragState
 	{
+		unknown ,isDragging, isNotDragging
+	}
+	//TODO
+	public virtual bool isPieceInTheWay(Vector2 tempPos)
+	{
+		Vector2I tempTile = tileMap.FromGlobalPosToTile((Vector2I)tempPos);
+		List<Vector2I> listOfTilesToCheck = new List<Vector2I>();
+		listOfTilesToCheck.Add(tempTile);
+		Vector2I diffVector = tempTile - prevTile;
+		Vector2I destinationTile = prevTile;
+		while(destinationTile != tempTile)
+		{
+			listOfTilesToCheck.Add(destinationTile);
+			if(diffVector.X > 0)
+			{
+				destinationTile.X++;
+			}
+			if(diffVector.X < 0)
+			{
+				destinationTile.X--;
+			}
+			if(diffVector.Y > 0)
+			{
+				destinationTile.Y++;
+			}
+			if(diffVector.Y < 0)
+			{
+				destinationTile.Y--;
+			}
+			
+		}
+
+		foreach (var oNode in node2D.GetChildren())
+		{
+			if(oNode is ChessPiece)
+			{
+				ChessPiece chessPiece = (ChessPiece)oNode;
+				if(chessPiece != this)
+				{
+					Vector2I pieceTile = tileMap.FromGlobalPosToTile((Vector2I)chessPiece.Position);
+
+					foreach (Vector2 element in listOfTilesToCheck )
+					{
+						if(pieceTile == element)
+						{
+							GD.Print("Piece is in the way at: " + element);
+							return true;
+							
+						}
+					}
+
+				}
+			}
+		}
 		return false;
 	}
-	
 }

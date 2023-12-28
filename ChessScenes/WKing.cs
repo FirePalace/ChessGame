@@ -17,18 +17,24 @@ public partial class WKing : ChessPiece
 	 public override bool isValidMove(Vector2 tempPos)
     {
 		Vector2I tempTile = tileMap.FromGlobalPosToTile((Vector2I)tempPos);
+		int xOffset = tempTile.X - prevTile.X;
+		int yOffset = tempTile.Y - prevTile.Y;
 		
 		
-		
-		if(tempTile.X == prevTile.X || tempTile.Y == prevTile.Y || tempTile.X - 1 == prevTile.X || tempTile.Y -1 == prevTile.Y || tempTile.X + 1 == prevTile.X || tempTile.Y + 1 == prevTile.Y )
-		{
-		
-			// up down left right
+		if(tempTile.X == prevTile.X || tempTile.Y == prevTile.Y)
+		{	
 			if(tempTile.Y - prevTile.Y == -1 ||tempTile.Y - prevTile.Y == 1|| tempTile.X - prevTile.X == -1 ||  tempTile.X - prevTile.X == 1 )
 			{
 				return true;
 			}
 			
+		}
+		if (Math.Abs(yOffset) == 1 && Math.Abs(xOffset) == 1)
+		{
+			if(yOffset == xOffset || yOffset - xOffset == 0 || yOffset + xOffset == 0)
+			{
+				return true;
+			}
 		}
 
 		return false;

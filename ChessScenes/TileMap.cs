@@ -10,26 +10,35 @@ public partial class TileMap : Godot.TileMap
 	{	
 		
 		node2D = GetNode<Node2D>("..");
-		Sprite2D wRook1 = node2D.GetNode<Sprite2D>("WRook");
-		Sprite2D wRook2 = new Rook();
-		Sprite2D bRook1 = new Rook();
-		Sprite2D bRook2 = new Rook();
+		ChessPiece wRook1 = new Rook();
+		ChessPiece wRook2 = new Rook();
+		ChessPiece bRook1 = new Rook();
+		bRook1.isWhite = false;
+		ChessPiece bRook2 = new Rook();
+		bRook2.isWhite = false;
+		
+		ChessPiece wBishop1 = new WBishop();
+		ChessPiece wBishop2 = new WBishop();
+		ChessPiece bBishop1 = new WBishop();
+		bBishop1.isWhite = false;
+		ChessPiece bBishop2 = new WBishop();
+		bBishop2.isWhite = false;
 
-		Sprite2D wBishop1 = node2D.GetNode<Sprite2D>("WBishop");
-		Sprite2D wBishop2 = new WBishop();
-		Sprite2D bBishop1 = new WBishop();
-		Sprite2D bBishop2 = new WBishop();
+		ChessPiece wKnight1 = new WKnight();
+		ChessPiece wKnight2 = new WKnight();
+		ChessPiece bKnight1 = new WKnight();
+		bKnight1.isWhite = false;
+		ChessPiece bKnight2 = new WKnight();
+		bKnight2.isWhite = false;
 
-		Sprite2D wKnight1 = node2D.GetNode<Sprite2D>("WKnight");
-		Sprite2D wKnight2 = new WKnight();
-		Sprite2D bKnight1 = new WKnight();
-		Sprite2D bKnight2 = new WKnight();
+		ChessPiece wQueen = new WQueen();
+		ChessPiece bQueen = new WQueen();
+		bQueen.isWhite = false;
 
-		Sprite2D wQueen = node2D.GetNode<Sprite2D>("WQueen");
-		Sprite2D bQueen = new WQueen();
 
-		Sprite2D wKing = node2D.GetNode<Sprite2D>("WKing");
-		Sprite2D bKing = new WKing();
+		ChessPiece wKing = new WKing();
+		ChessPiece bKing = new WKing();
+		bKing.isWhite = false;
 		
 		for (int i = 0; i < 8; i++)
 		{
@@ -42,25 +51,25 @@ public partial class TileMap : Godot.TileMap
 		}
 		
 		
-		wRook1.Position = FromTileToGlobalPos(new Vector2I(0,7));
+		SpawnPiece(wRook1,"wRook1", "white-rook", new Vector2I(0,7));
 		SpawnPiece(wRook2,"wRook2", "white-rook", new Vector2I(7,7));
 		SpawnPiece(bRook1,"bRook1", "black-rook", new Vector2I(0,0));
 		SpawnPiece(bRook2,"bRook2", "black-rook", new Vector2I(7,0));
 
-		wBishop1.Position = FromTileToGlobalPos(new Vector2I(2,7));
+		SpawnPiece(wBishop1, "wBishop1", "white-bishop", new Vector2I(2,7));
 		SpawnPiece(wBishop2, "wBishop2", "white-bishop", new Vector2I(5,7));
 		SpawnPiece(bBishop1, "wBishop1", "black-bishop", new Vector2I(2,0));
 		SpawnPiece(bBishop2, "bBishop2", "black-bishop", new Vector2I(5,0));
 
-		wKnight1.Position = FromTileToGlobalPos(new Vector2I(1,7));
+		SpawnPiece(wKnight1, "wKnight1", "white-knight", new Vector2I(1,7));
 		SpawnPiece(wKnight2, "wKnight2", "white-knight", new Vector2I(6,7));
 		SpawnPiece(bKnight1, "bKnight1", "black-knight", new Vector2I(1,0));
 		SpawnPiece(bKnight2, "bKnight2", "black-knight", new Vector2I(6,0));
 
-		wQueen.Position = FromTileToGlobalPos(new Vector2I(3,7));
+		SpawnPiece(wQueen, "wQueen", "white-queen", new Vector2I(3,7));
 		SpawnPiece(bQueen, "bQueen", "black-queen", new Vector2I(3,0));
 
-		wKing.Position = FromTileToGlobalPos(new Vector2I(4,7));
+		SpawnPiece(wKing, "wKing", "white-king", new Vector2I(4,7));
 		SpawnPiece(bKing, "bKing", "black-king", new Vector2I(4,0));
 	}
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
