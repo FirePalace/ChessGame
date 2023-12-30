@@ -14,7 +14,7 @@ public partial class WKnight : ChessPiece
 	{
 		base._Process(delta);
 	}
-	 public override bool isValidMove(Vector2 tempPos)
+	 public override bool IsValidMove(Vector2 tempPos)
     {
 		Vector2I tempTile = tileMap.FromGlobalPosToTile((Vector2I)tempPos);
 				
@@ -35,7 +35,7 @@ public partial class WKnight : ChessPiece
 		}
 		return false;
 	}
-    public override bool isPieceInTheWay(Vector2 tempPos)
+    public override bool IsPieceInTheWay(Vector2 tempPos)
     {
         return false;
     }

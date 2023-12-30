@@ -14,7 +14,7 @@ public partial class WBishop : ChessPiece
 	{
 		base._Process(delta);
 	}
-	public override bool isValidMove(Vector2 tempPos)
+	public override bool IsValidMove(Vector2 tempPos)
     {
 		Vector2I tempTile = tileMap.FromGlobalPosToTile((Vector2I)tempPos);
 		int xOffset = tempTile.X - prevTile.X;

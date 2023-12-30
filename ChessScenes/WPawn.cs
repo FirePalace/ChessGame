@@ -20,9 +20,11 @@ public partial class WPawn : ChessPiece
 		
 
 	}
-    public override bool isValidMove(Vector2 tempPos)
+    public override bool IsValidMove(Vector2 tempPos)
     {
 		Vector2I tempTile = tileMap.FromGlobalPosToTile((Vector2I)tempPos);
+		int xOffset = tempTile.X - prevTile.X;
+		int yOffset = tempTile.Y - prevTile.Y;
 		
 		
 		
@@ -49,9 +51,30 @@ public partial class WPawn : ChessPiece
 			{
 				hasMoved = true;
 				return true;
+			}	
+			
+		}
+		
+		//Capturing diagonally
+		if(isWhite && xOffset == yOffset && yOffset == -1  || isWhite && Math.Abs(xOffset) - Math.Abs(yOffset) == 0 && yOffset == -1 )
+		{
+
+			if(IsCollisionWithOppositeColor(tempPos)){
+				hasMoved = true;
+				return true;
 			}
 			
 		}
+		if(!isWhite && xOffset == yOffset && yOffset == 1  || !isWhite && Math.Abs(xOffset) - Math.Abs(yOffset) == 0 && yOffset == 1 )
+		{
+
+			if(IsCollisionWithOppositeColor(tempPos)){
+				hasMoved = true;
+				return true;
+			}
+			
+		}
+
         return false;
     }
 

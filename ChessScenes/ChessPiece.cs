@@ -2,6 +2,7 @@ using Godot;
 using Godot.Collections;
 using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Linq.Expressions;
 
 public partial class ChessPiece : Sprite2D
@@ -13,22 +14,6 @@ public partial class ChessPiece : Sprite2D
 	public bool isWhite = true;
 	public static bool isWhitesTurn = true;
 	Node2D node2D;
-
-	
-
-	//? Bitboard
-	/* long wPawnsPos;
-	long wKnightsPos;
-	long wBishopsPos;
-	long wRooksPos;
-	long wQueenPos;
-	long wKing;
-	long bPawnPos;
-	long bKnightsPos;
-	long bBishopsPos;
-	long bRooksPos;
-	long bQueenPos;
-	long bKing; */
 
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
@@ -71,7 +56,7 @@ public partial class ChessPiece : Sprite2D
 			
 			if(isWhitesTurn)
 			{
-				if(isValidMove(tempPos) && !isCollision(tempPos) && !isPieceInTheWay(tempPos) && this.isWhite == true)
+				if(IsValidMove(tempPos) && !IsCollision(tempPos) && !IsPieceInTheWay(tempPos) && this.isWhite == true)
 				{
 					this.Position = tempPos;
 					placeInTileCallCount--;
@@ -80,14 +65,25 @@ public partial class ChessPiece : Sprite2D
 					isWhitesTurn = false;
 		
 				}
+				else if (IsValidMove(tempPos) && IsCollisionWithOppositeColor(tempPos) && this.isWhite == true)
+				{
+					GD.Print("white piece captured");
+					CapturePiece(tempPos);
+					isWhitesTurn = false;
+				}
 				else
 				{
-					this.Position = tileMap.FromTileToGlobalPos(prevTile);
+
+				this.Position = tileMap.FromTileToGlobalPos(prevTile);
 				}
+						
+					
+				
 			}
+			// Black's turn
 			else
 			{
-				if(isValidMove(tempPos) && !isCollision(tempPos) &&  !isPieceInTheWay(tempPos) && this.isWhite == false)
+				if(IsValidMove(tempPos) && !IsCollision(tempPos) &&  !IsPieceInTheWay(tempPos) && this.isWhite == false)
 				{
 					this.Position = tempPos;
 					placeInTileCallCount--;
@@ -95,6 +91,13 @@ public partial class ChessPiece : Sprite2D
 					GD.Print("prevTile: " + prevTile);
 					isWhitesTurn = true;
 		
+				}
+				else if (IsValidMove(tempPos) && IsCollisionWithOppositeColor(tempPos) && this.isWhite == false)
+				{
+					GD.Print("black piece captured");
+					CapturePiece(tempPos);
+					isWhitesTurn = true;
+					
 				}
 				else
 				{
@@ -136,12 +139,12 @@ public partial class ChessPiece : Sprite2D
 	return prevTile;
 	}
 
-	public virtual bool isValidMove(Vector2 tempPos)
+	public virtual bool IsValidMove(Vector2 tempPos)
 	{
 		return false;
 	}
 
-	public bool isCollision(Vector2 tempPos)
+	public bool IsCollision(Vector2 tempPos)
 	{
 		foreach (var oNode in node2D.GetChildren())
 		{
@@ -157,9 +160,7 @@ public partial class ChessPiece : Sprite2D
 						return true;
 					}
 				}
-
 			}
-			
 		}
 		return false;
 	}
@@ -168,8 +169,8 @@ public partial class ChessPiece : Sprite2D
 	{
 		unknown ,isDragging, isNotDragging
 	}
-	//TODO
-	public virtual bool isPieceInTheWay(Vector2 tempPos)
+	
+	public virtual bool IsPieceInTheWay(Vector2 tempPos)
 	{
 		Vector2I tempTile = tileMap.FromGlobalPosToTile((Vector2I)tempPos);
 		List<Vector2I> listOfTilesToCheck = new List<Vector2I>();
@@ -221,5 +222,48 @@ public partial class ChessPiece : Sprite2D
 			}
 		}
 		return false;
+	}
+	public bool IsCollisionWithOppositeColor(Vector2 tempPos)
+	{
+		foreach (var oNode in node2D.GetChildren())
+		{
+			if(oNode is ChessPiece)
+			{
+				ChessPiece chessPiece = (ChessPiece)oNode;
+				if(chessPiece != this)
+				{
+					Vector2I pieceTile = tileMap.FromGlobalPosToTile((Vector2I)chessPiece.Position);
+					Vector2I tempTile = tileMap.FromGlobalPosToTile((Vector2I)tempPos);
+
+					if(tempTile.X == pieceTile.X && tempTile.Y == pieceTile.Y && this.isWhite != chessPiece.isWhite)
+					{
+						GD.Print("Opposite color");
+						return true;
+						
+					}
+				}
+			}
+		}
+		return false;
+	}
+	public void CapturePiece(Vector2 tempPos){
+		foreach (var oNode in node2D.GetChildren())
+		{
+			if(oNode is ChessPiece)
+			{
+				ChessPiece chessPiece = (ChessPiece)oNode;
+				if(chessPiece != this)
+				{
+					Vector2I pieceTile = tileMap.FromGlobalPosToTile((Vector2I)chessPiece.Position);
+					Vector2I tempTile = tileMap.FromGlobalPosToTile((Vector2I)tempPos);
+						if(tempTile == pieceTile)
+						{
+							node2D.CallDeferred("remove_child", chessPiece);
+							this.Position = tileMap.FromTileToGlobalPos(tempTile);
+							
+						}	
+				}
+			}
+		}
 	}
 }
