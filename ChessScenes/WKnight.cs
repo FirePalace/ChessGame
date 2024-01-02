@@ -14,29 +14,33 @@ public partial class WKnight : ChessPiece
 	{
 		base._Process(delta);
 	}
-	 public override bool IsValidMove(Vector2 tempPos)
-    {
+	public override bool IsValidMove(Vector2 tempPos)
+	{
 		Vector2I tempTile = tileMap.FromGlobalPosToTile((Vector2I)tempPos);
-				
-		if(tempTile.X - 2 == prevTile.X || tempTile.X + 2 == prevTile.X)
+		if (tempTile != prevTile)
 		{
-			if (tempTile.Y - 1 == prevTile.Y || tempTile.Y + 1 == prevTile.Y)
-			{
-				return true;
-			}
-		}
 
-		if (tempTile.Y - 2 == prevTile.Y || tempTile.Y + 2 == prevTile.Y)
-		{
-			if(tempTile.X - 1 == prevTile.X || tempTile.X + 1 == prevTile.X)
+			if (tempTile.X - 2 == prevTile.X || tempTile.X + 2 == prevTile.X)
 			{
-				return true;
+				if (tempTile.Y - 1 == prevTile.Y || tempTile.Y + 1 == prevTile.Y)
+				{
+					return true;
+				}
 			}
+
+			if (tempTile.Y - 2 == prevTile.Y || tempTile.Y + 2 == prevTile.Y)
+			{
+				if (tempTile.X - 1 == prevTile.X || tempTile.X + 1 == prevTile.X)
+				{
+					return true;
+				}
+			}
+
 		}
 		return false;
 	}
-    public override bool IsPieceInTheWay(Vector2 tempPos)
-    {
-        return false;
-    }
+	public override bool IsPieceInTheWay(Vector2 tempPos)
+	{
+		return false;
+	}
 }

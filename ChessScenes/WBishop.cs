@@ -15,16 +15,17 @@ public partial class WBishop : ChessPiece
 		base._Process(delta);
 	}
 	public override bool IsValidMove(Vector2 tempPos)
-    {
+	{
 		Vector2I tempTile = tileMap.FromGlobalPosToTile((Vector2I)tempPos);
 		int xOffset = tempTile.X - prevTile.X;
 		int yOffset = tempTile.Y - prevTile.Y;
-	
-		if(yOffset == xOffset || yOffset - xOffset == 0 || yOffset + xOffset == 0)
+		if (tempTile != prevTile && !IsPieceInTheWay(tempPos))
 		{
-			return true;
+			if (yOffset == xOffset || yOffset - xOffset == 0 || yOffset + xOffset == 0)
+			{
+				return true;
+			}
 		}
-		
 		return false;
 	}
 }

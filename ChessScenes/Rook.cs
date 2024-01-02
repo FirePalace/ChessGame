@@ -8,7 +8,7 @@ using System.Runtime.Serialization;
 
 
 public partial class Rook : ChessPiece
-{	
+{
 
 
 	// Called when the node enters the scene tree for the first time.
@@ -24,12 +24,14 @@ public partial class Rook : ChessPiece
 
 	}
 	public override bool IsValidMove(Vector2 tempPos)
-    {
+	{
 		Vector2I tempTile = tileMap.FromGlobalPosToTile((Vector2I)tempPos);
-	
-		if(tempTile.X == prevTile.X || tempTile.Y == prevTile.Y)
+		if (tempTile != prevTile && !IsPieceInTheWay(tempPos))
 		{
-			return true;
+			if (tempTile.X == prevTile.X || tempTile.Y == prevTile.Y)
+			{
+				return true;
+			}
 		}
 		return false;
 	}
