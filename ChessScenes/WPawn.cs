@@ -20,9 +20,13 @@ public partial class WPawn : ChessPiece
 	}
 	public override bool IsValidMove(Vector2 tempPos)
 	{
+		return IsValidMove( tempPos, prevTile);
+	}
+	public override bool IsValidMove(Vector2 tempPos, Vector2I tileStart)
+	{
 		Vector2I tempTile = tileMap.FromGlobalPosToTile((Vector2I)tempPos);
-		int xOffset = tempTile.X - prevTile.X;
-		int yOffset = tempTile.Y - prevTile.Y;
+		int xOffset = tempTile.X - tileStart.X;
+		int yOffset = tempTile.Y - tileStart.Y;
 		int direction;
 
 		if (isWhite)
@@ -34,12 +38,12 @@ public partial class WPawn : ChessPiece
 			direction = 1;
 		}
 
-		if (tempTile != prevTile && !IsPieceInTheWay(tempPos))
+		if (tempTile != tileStart && !IsPieceInTheWay(tempPos))
 		{
-			if (tempTile.X == prevTile.X)
+			if (tempTile.X == tileStart.X)
 			{
 				//Normal pawn move
-				if ((tempTile.Y - prevTile.Y) == direction)
+				if ((tempTile.Y - tileStart.Y) == direction)
 				{
 					if (!IsCollisionWithOppositeColor(tempPos))
 					{
@@ -49,7 +53,7 @@ public partial class WPawn : ChessPiece
 
 				}
 				//double move forward
-				if ((tempTile.Y - prevTile.Y) == 2 * direction && hasMoved == false)
+				if ((tempTile.Y - tileStart.Y) == 2 * direction && hasMoved == false)
 				{
 					if (!IsCollisionWithOppositeColor(tempPos))
 					{

@@ -25,10 +25,16 @@ public partial class Rook : ChessPiece
 	}
 	public override bool IsValidMove(Vector2 tempPos)
 	{
+		return IsValidMove( tempPos, prevTile);
+	
+
+	}
+	public override bool IsValidMove(Vector2 tempPos, Vector2I tileStart)
+	{
 		Vector2I tempTile = tileMap.FromGlobalPosToTile((Vector2I)tempPos);
-		if (tempTile != prevTile && !IsPieceInTheWay(tempPos))
+		if (tempTile != tileStart && !IsPieceInTheWay(tempPos))
 		{
-			if (tempTile.X == prevTile.X || tempTile.Y == prevTile.Y)
+			if (tempTile.X == tileStart.X || tempTile.Y == tileStart.Y)
 			{
 				return true;
 			}

@@ -19,33 +19,39 @@ public partial class TileMap : Godot.TileMap
 				{
 					chessPiece.Position =FromTileToGlobalPos(new Vector2I(0, 7));
 					chessPiece.prevTile = new Vector2I(0, 7);
+					chessPiece.ZIndex = 2;
 
 				}
 				if (chessPiece.Name == "wPawn")
 				{
 					chessPiece.Position = FromTileToGlobalPos(new Vector2I(0, 6));
 					chessPiece.prevTile = new Vector2I(0, 6);
+					chessPiece.ZIndex = 2;
 				}
 
 				if (chessPiece.Name == "wBishop1")
 				{
 					chessPiece.Position = FromTileToGlobalPos(new Vector2I(2, 7));
 					chessPiece.prevTile = new Vector2I(2, 7);
+					chessPiece.ZIndex = 2;
 				}
 				if (chessPiece.Name == "wKnight1")
 				{
 					chessPiece.Position = FromTileToGlobalPos(new Vector2I(1, 7));
 					chessPiece.prevTile = new Vector2I(1, 7);
+					chessPiece.ZIndex = 2;
 				}
 				if(chessPiece.Name == "WQueen")
 				{
 					chessPiece.Position = FromTileToGlobalPos(new Vector2I(3, 7));
 					chessPiece.prevTile = new Vector2I(3, 7);
+					chessPiece.ZIndex = 2;
 				}
 				if(chessPiece.Name == "WKing")
 				{
 					chessPiece.Position = FromTileToGlobalPos(new Vector2I(4, 7));
 					chessPiece.prevTile = new Vector2I(4, 7);
+					chessPiece.ZIndex = 2;
 				}
 			}
 		}
@@ -150,6 +156,7 @@ public partial class TileMap : Godot.TileMap
 		piece.Texture = (Texture2D)GD.Load("res://ChessAssets/pieces-basic-png/" + pieceType + ".png");
 		piece.Scale = new Godot.Vector2(0.125f, 0.125f);
 		piece.Position = FromTileToGlobalPos(tilePosition);
+		piece.ZIndex = 2;
 		((ChessPiece)piece).prevTile = tilePosition;
 
 	}

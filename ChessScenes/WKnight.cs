@@ -16,21 +16,27 @@ public partial class WKnight : ChessPiece
 	}
 	public override bool IsValidMove(Vector2 tempPos)
 	{
+		return IsValidMove( tempPos, prevTile);
+	
+
+	}
+	public override bool IsValidMove(Vector2 tempPos, Vector2I tileStart)
+	{
 		Vector2I tempTile = tileMap.FromGlobalPosToTile((Vector2I)tempPos);
-		if (tempTile != prevTile)
+		if (tempTile != tileStart)
 		{
 
-			if (tempTile.X - 2 == prevTile.X || tempTile.X + 2 == prevTile.X)
+			if (tempTile.X - 2 == tileStart.X || tempTile.X + 2 == tileStart.X)
 			{
-				if (tempTile.Y - 1 == prevTile.Y || tempTile.Y + 1 == prevTile.Y)
+				if (tempTile.Y - 1 == tileStart.Y || tempTile.Y + 1 == tileStart.Y)
 				{
 					return true;
 				}
 			}
 
-			if (tempTile.Y - 2 == prevTile.Y || tempTile.Y + 2 == prevTile.Y)
+			if (tempTile.Y - 2 == tileStart.Y || tempTile.Y + 2 == tileStart.Y)
 			{
-				if (tempTile.X - 1 == prevTile.X || tempTile.X + 1 == prevTile.X)
+				if (tempTile.X - 1 == tileStart.X || tempTile.X + 1 == tileStart.X)
 				{
 					return true;
 				}
@@ -40,6 +46,10 @@ public partial class WKnight : ChessPiece
 		return false;
 	}
 	public override bool IsPieceInTheWay(Vector2 tempPos)
+	{
+		return IsPieceInTheWay( tempPos, prevTile);
+	}
+	public override bool IsPieceInTheWay(Vector2 tempPos, Vector2I tileStart)
 	{
 		return false;
 	}

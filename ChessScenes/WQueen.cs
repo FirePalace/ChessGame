@@ -13,19 +13,22 @@ public partial class WQueen : ChessPiece
 	public override void _Process(double delta)
 	{
 		base._Process(delta);
-		if (prevTile == new Vector2I(3, 7))
-		{
-			GD.Print("prevTile is 3, 7");
-		}
+		
 	}
 	public override bool IsValidMove(Vector2 tempPos)
 	{
+		return IsValidMove( tempPos, prevTile);
+	
+
+	}
+	public override bool IsValidMove(Vector2 tempPos, Vector2I tileStart)
+	{
 		Vector2I tempTile = tileMap.FromGlobalPosToTile((Vector2I)tempPos);
-		int xOffset = tempTile.X - prevTile.X;
-		int yOffset = tempTile.Y - prevTile.Y;
-		if (tempTile != prevTile && !IsPieceInTheWay(tempPos))
+		int xOffset = tempTile.X - tileStart.X;
+		int yOffset = tempTile.Y - tileStart.Y;
+		if (tempTile != tileStart && !IsPieceInTheWay(tempPos, tileStart))
 		{
-			if (tempTile.X == prevTile.X || tempTile.Y == prevTile.Y)
+			if (tempTile.X == tileStart.X || tempTile.Y == tileStart.Y)
 			{
 				return true;
 			}
@@ -37,7 +40,7 @@ public partial class WQueen : ChessPiece
 			}
 		}
 		return false;
-
 	}
+
 }
 
