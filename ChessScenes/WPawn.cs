@@ -99,9 +99,7 @@ public partial class WPawn : ChessPiece
 					return true;
 				}
 			}
-
 		}
-
 		return false;
 	}
 

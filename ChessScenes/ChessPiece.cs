@@ -24,19 +24,15 @@ public partial class ChessPiece : Sprite2D
 	{
 		node2D = GetNode<Node2D>("..");
 		tileMap = node2D.GetNode<TileMap>("Tilemap");
-
 	}
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
 	public override void _Process(double delta)
 	{
-
 		Vector2 MousePos = GetGlobalMousePosition();
 
 		Rect2 inBounds = new Rect2I(0, 0, 128, 128);
 		Rect2 viewport = new Rect2I(-70, -10, 200, 140);
-
-
 
 		if (IsDragging == dragState.isDragging)
 		{
@@ -61,89 +57,26 @@ public partial class ChessPiece : Sprite2D
 			//Whites turn
 			if (isWhitesTurn)
 			{
-				if (this.isWhite == true &&MoveHandling((Vector2I)tempPos,this.isWhite, isWhitesTurn))
+				if (this.isWhite == true && MoveHandling((Vector2I)tempPos, this.isWhite, isWhitesTurn))
 				{
-					
 				}
-				else if (this.isWhite == true && IsValidMove(tempPos) && IsCollisionWithOppositeColor(tempPos))
+				else if (this.isWhite == true && CaptureHandling((Vector2I)tempPos, this.isWhite, isWhitesTurn))
 				{
-					GD.Print("black piece captured");
-					CapturePiece(tempPos);
-					if (IsInCheck())
-					{
-						if (IsCheck(isWhitesTurn))
-						{
-							this.Position = tileMap.FromTileToGlobalPos(prevTile);
-						}
-						else if (!whiteWasInCheck)
-						{
-							GD.Print("I am in check2");
-							Vector2 kingPosition = GetKingTilePos(!isWhitesTurn);
-							SpawnRedSquare(redSquare, (Vector2I)kingPosition);
-							blackWasInCheck = true;
-							isWhitesTurn = false;
-
-						}
-						else if (whiteWasInCheck)
-						{
-							this.Position = tileMap.FromTileToGlobalPos(prevTile);
-						}
-					}
-					else
-					{
-						GD.Print("I should not be in check");
-						RemoveRedSquare();
-						blackWasInCheck = false;
-						isWhitesTurn = false;
-					}
 				}
 				else
 				{
-
 					this.Position = tileMap.FromTileToGlobalPos(prevTile);
 				}
 			}
 			// Black's turn
 			else
 			{
-
 				if (this.isWhite == false && MoveHandling((Vector2I)tempPos, this.isWhite, !isWhitesTurn))
 				{
 
 				}
-				else if (this.isWhite == false && IsValidMove(tempPos) && IsCollisionWithOppositeColor(tempPos))
+				else if (this.isWhite == false && CaptureHandling((Vector2I)tempPos, this.isWhite, !isWhitesTurn))
 				{
-					GD.Print("white piece captured");
-					CapturePiece(tempPos);
-
-					if (IsInCheck())
-					{
-						if (IsCheck(!isWhitesTurn))
-						{
-							this.Position = tileMap.FromTileToGlobalPos(prevTile);
-						}
-						else if (!blackWasInCheck)
-						{
-							GD.Print("I am in check3");
-							Vector2 kingPosition = GetKingTilePos(!isWhitesTurn);
-							SpawnRedSquare(redSquare, (Vector2I)kingPosition);
-							whiteWasInCheck = true;
-							isWhitesTurn = true;
-						}
-						else
-						{
-							this.Position = tileMap.FromTileToGlobalPos(prevTile);
-						}
-					}
-
-					else
-					{
-						GD.Print("I should not be in check");
-						RemoveRedSquare();
-						whiteWasInCheck = false;
-						isWhitesTurn = true;
-					}
-
 				}
 				else
 				{
@@ -204,18 +137,57 @@ public partial class ChessPiece : Sprite2D
 		}
 		return false;
 	}
-	public void SetIfKingInCheck(bool isWhite, bool value){
-		if(isWhite){
-			
+	public bool CaptureHandling(Vector2I tempPos, bool isWhitePiece, bool checkWhitesTurn)
+	{
+		if (IsValidMove(tempPos) && IsCollisionWithOppositeColor(tempPos))
+		{
+			GD.Print("black piece captured");
+			CapturePiece(tempPos);
+			if (IsInCheck())
+			{
+				if (IsCheck(checkWhitesTurn))
+				{
+					this.Position = tileMap.FromTileToGlobalPos(prevTile);
+				}
+				else if (!WasKingInCheck(checkWhitesTurn))
+				{
+					GD.Print("I am in check2");
+					Vector2 kingPosition = GetKingTilePos(!checkWhitesTurn);
+					SpawnRedSquare(redSquare, (Vector2I)kingPosition);
+					SetIfKingInCheck(!isWhitePiece, true);
+					isWhitesTurn = !isWhitesTurn;
+
+				}
+				else
+				{
+					this.Position = tileMap.FromTileToGlobalPos(prevTile);
+				}
+			}
+			else
+			{
+				GD.Print("I should not be in check");
+				RemoveRedSquare();
+				SetIfKingInCheck(!isWhitePiece, false);
+				isWhitesTurn = !isWhitesTurn;
+			}
+			return true;
+		}
+		return false;
+
+	}
+	public void SetIfKingInCheck(bool isWhite, bool value)
+	{
+		if (isWhite)
+		{
 			whiteWasInCheck = value;
 		}
-		else{
+		else
+		{
 			blackWasInCheck = value;
 		}
 	}
 	public bool WasKingInCheck(bool isWhite)
 	{
-
 		if (isWhite)
 		{
 			return whiteWasInCheck;
@@ -225,7 +197,7 @@ public partial class ChessPiece : Sprite2D
 	public override void _Input(InputEvent @event)
 	{
 
-		if (@event is InputEventMouseButton inputEventMouseButton)
+		if (@event is InputEventMouseButton inputEventMouseButton && inputEventMouseButton.ButtonIndex == MouseButton.Left)
 		{
 
 			if (tileMap.FromGlobalPosToTile((Vector2I)this.Position) == tileMap.FromGlobalPosToTile((Vector2I)GetGlobalMousePosition()))
@@ -246,8 +218,6 @@ public partial class ChessPiece : Sprite2D
 	public Vector2I PrevTile()
 	{
 		prevTile = tileMap.FromGlobalPosToTile((Vector2I)this.Position);
-
-
 		return prevTile;
 	}
 
@@ -318,7 +288,6 @@ public partial class ChessPiece : Sprite2D
 			}
 			if (listOfTilesToCheck.Count > 9)
 			{
-
 				break;
 			}
 		}
@@ -421,6 +390,11 @@ public partial class ChessPiece : Sprite2D
 		}
 		return false;
 	}
+	public bool IsCheck(bool isWhite)
+	{
+		Vector2I kingPos = tileMap.FromTileToGlobalPos((Vector2I)GetKingTilePos(isWhite));
+		return IsCheck(kingPos, isWhite);
+	}
 	public bool IsCheck(Vector2I kingPos, bool isWhite)
 	{
 		foreach (var oNode in node2D.GetChildren())
@@ -443,11 +417,7 @@ public partial class ChessPiece : Sprite2D
 		}
 		return false;
 	}
-	public bool IsCheck(bool isWhite)
-	{
-		Vector2I kingPos = tileMap.FromTileToGlobalPos((Vector2I)GetKingTilePos(isWhite));
-		return IsCheck(kingPos, isWhite);
-	}
+	
 	public Vector2 GetKingTilePos(bool isWhite)
 	{
 		foreach (var oNode in node2D.GetChildren())

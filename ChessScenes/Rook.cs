@@ -9,7 +9,7 @@ using System.Runtime.Serialization;
 
 public partial class Rook : ChessPiece
 {
-
+public bool hasMoved = false;
 
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
@@ -36,7 +36,9 @@ public partial class Rook : ChessPiece
 		{
 			if (tempTile.X == tileStart.X || tempTile.Y == tileStart.Y)
 			{
+				hasMoved = true;
 				return true;
+				
 			}
 		}
 		return false;
