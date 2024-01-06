@@ -18,6 +18,7 @@ public partial class ChessPiece : Sprite2D
 	Sprite2D redSquare = new Sprite2D();
 	public static bool whiteWasInCheck = false;
 	public static bool blackWasInCheck = false;
+	public bool ignoreCheck = false;
 
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
@@ -141,12 +142,20 @@ public partial class ChessPiece : Sprite2D
 	{
 		if (IsValidMove(tempPos) && IsCollisionWithOppositeColor(tempPos))
 		{
-			GD.Print("black piece captured");
-			CapturePiece(tempPos);
+
+			ChessPiece pieceToCapture = GetPiece(tempPos);
+			if (pieceToCapture != null)
+			{
+				pieceToCapture.ignoreCheck = true;
+			}
 			if (IsInCheck())
 			{
 				if (IsCheck(checkWhitesTurn))
 				{
+					if (pieceToCapture != null)
+					{
+						pieceToCapture.ignoreCheck = false;
+					}
 					this.Position = tileMap.FromTileToGlobalPos(prevTile);
 				}
 				else if (!WasKingInCheck(checkWhitesTurn))
@@ -155,11 +164,17 @@ public partial class ChessPiece : Sprite2D
 					Vector2 kingPosition = GetKingTilePos(!checkWhitesTurn);
 					SpawnRedSquare(redSquare, (Vector2I)kingPosition);
 					SetIfKingInCheck(!isWhitePiece, true);
+					GD.Print("piece captured");
+					CapturePiece(tempPos);
 					isWhitesTurn = !isWhitesTurn;
 
 				}
 				else
 				{
+					if (pieceToCapture != null)
+					{
+						pieceToCapture.ignoreCheck = false;
+					}
 					this.Position = tileMap.FromTileToGlobalPos(prevTile);
 				}
 			}
@@ -168,6 +183,8 @@ public partial class ChessPiece : Sprite2D
 				GD.Print("I should not be in check");
 				RemoveRedSquare();
 				SetIfKingInCheck(!isWhitePiece, false);
+				GD.Print("piece captured");
+				CapturePiece(tempPos);
 				isWhitesTurn = !isWhitesTurn;
 			}
 			return true;
@@ -197,20 +214,22 @@ public partial class ChessPiece : Sprite2D
 	public override void _Input(InputEvent @event)
 	{
 
-		if (@event is InputEventMouseButton inputEventMouseButton && inputEventMouseButton.ButtonIndex == MouseButton.Left)
+		if (@event is InputEventMouseButton inputEventMouseButton)
 		{
-
-			if (tileMap.FromGlobalPosToTile((Vector2I)this.Position) == tileMap.FromGlobalPosToTile((Vector2I)GetGlobalMousePosition()))
+			if (inputEventMouseButton.ButtonIndex == MouseButton.Left)
 			{
-				if (IsDragging == dragState.isDragging && !inputEventMouseButton.IsPressed())
+				if (tileMap.FromGlobalPosToTile((Vector2I)this.Position) == tileMap.FromGlobalPosToTile((Vector2I)GetGlobalMousePosition()))
 				{
-					IsDragging = dragState.isNotDragging;
-				}
-				else if (inputEventMouseButton.IsPressed())
-				{
-					IsDragging = dragState.isDragging;
-					placeInTileCallCount = 1;
-					PrevTile();
+					if (IsDragging == dragState.isDragging && !inputEventMouseButton.IsPressed())
+					{
+						IsDragging = dragState.isNotDragging;
+					}
+					else if (inputEventMouseButton.IsPressed())
+					{
+						IsDragging = dragState.isDragging;
+						placeInTileCallCount = 1;
+						PrevTile();
+					}
 				}
 			}
 		}
@@ -292,32 +311,42 @@ public partial class ChessPiece : Sprite2D
 			}
 		}
 		//?
-		listOfTilesToCheck.RemoveAt(0);
+		if (listOfTilesToCheck.Count > 0)
+		{
+			listOfTilesToCheck.RemoveAt(0);
+		}
+
 
 		foreach (var oNode in node2D.GetChildren())
 		{
 			if (oNode is ChessPiece)
 			{
 				ChessPiece chessPiece = (ChessPiece)oNode;
-				if (chessPiece != this)
+
+
+				Vector2I pieceTile = tileMap.FromGlobalPosToTile((Vector2I)chessPiece.Position);
+
+				foreach (Vector2 element in listOfTilesToCheck)
 				{
-					Vector2I pieceTile = tileMap.FromGlobalPosToTile((Vector2I)chessPiece.Position);
-
-					foreach (Vector2 element in listOfTilesToCheck)
+					if (pieceTile == element && tempTile != pieceTile)
 					{
-						if (pieceTile == element && tempTile != pieceTile)
-						{
-							return true;
-						}
+						GD.Print("Piece is in the way");
+						return true;
 					}
-
 				}
+
+
 			}
 		}
 		return false;
 	}
 
 	public bool IsCollisionWithOppositeColor(Vector2 tempPos)
+	{
+
+		return GetPiece(tempPos) != null;
+	}
+	public ChessPiece GetPiece(Vector2 tempPos)
 	{
 		foreach (var oNode in node2D.GetChildren())
 		{
@@ -332,13 +361,13 @@ public partial class ChessPiece : Sprite2D
 					if (tempTile.X == pieceTile.X && tempTile.Y == pieceTile.Y && this.isWhite != chessPiece.isWhite)
 					{
 						GD.Print("Opposite color");
-						return true;
+						return chessPiece;
 
 					}
 				}
 			}
 		}
-		return false;
+		return null;
 	}
 	public void CapturePiece(Vector2 tempPos)
 	{
@@ -364,31 +393,8 @@ public partial class ChessPiece : Sprite2D
 	}
 	public bool IsInCheck()
 	{
-		Vector2I kingPos = new Vector2I();
-		foreach (var oNode in node2D.GetChildren())
-		{
-			if (oNode is ChessPiece)
-			{
-				ChessPiece chessPiece = (ChessPiece)oNode;
-				if (chessPiece.Name == "WKing")
-				{
-					kingPos = (Vector2I)chessPiece.Position;
-					if (IsCheck(kingPos, false))
-					{
-						return true;
-					}
-				}
-				if (chessPiece.Name == "bKing")
-				{
-					kingPos = (Vector2I)chessPiece.Position;
-					if (IsCheck(kingPos, true))
-					{
-						return true;
-					}
-				}
-			}
-		}
-		return false;
+
+		return IsCheck(true) || IsCheck(false);
 	}
 	public bool IsCheck(bool isWhite)
 	{
@@ -403,7 +409,7 @@ public partial class ChessPiece : Sprite2D
 			{
 				ChessPiece chessPiece = (ChessPiece)oNode;
 
-				if (chessPiece.isWhite == isWhite)
+				if (chessPiece.isWhite != isWhite && !chessPiece.ignoreCheck)
 				{
 					Vector2I currentTile = tileMap.FromGlobalPosToTile((Vector2I)chessPiece.Position);
 
@@ -412,12 +418,13 @@ public partial class ChessPiece : Sprite2D
 						GD.Print("test");
 						return true;
 					}
+
 				}
 			}
 		}
 		return false;
 	}
-	
+
 	public Vector2 GetKingTilePos(bool isWhite)
 	{
 		foreach (var oNode in node2D.GetChildren())
@@ -463,5 +470,20 @@ public partial class ChessPiece : Sprite2D
 			}
 		}
 	}
+	public bool IsAllowedToCastle(Vector2I rookPosition)
+	{
+		foreach (var oNode in node2D.GetChildren())
+		{
+			if (oNode is Rook)
+			{
+				Rook chessPiece = (Rook)oNode;
+				if (chessPiece.Position == rookPosition && chessPiece.hasMoved == true)
+				{
+					return true;
+				}
 
+			}
+		}
+		return false;
+	}
 }

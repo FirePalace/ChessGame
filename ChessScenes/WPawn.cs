@@ -38,7 +38,7 @@ public partial class WPawn : ChessPiece
 			direction = 1;
 		}
 
-		if (tempTile != tileStart && !IsPieceInTheWay(tempPos))
+		if (tempTile != tileStart && !IsPieceInTheWay(tempPos, tileStart))
 		{
 			if (tempTile.X == tileStart.X)
 			{

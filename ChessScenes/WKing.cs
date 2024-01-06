@@ -2,8 +2,8 @@ using Godot;
 using System;
 
 public partial class WKing : ChessPiece
-
 {
+	public bool hasMoved = false;
 	public bool isInCheck = false;
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
@@ -22,12 +22,18 @@ public partial class WKing : ChessPiece
 		int xOffset = tempTile.X - prevTile.X;
 		int yOffset = tempTile.Y - prevTile.Y;
 
-		if (tempTile != prevTile && !IsPieceInTheWay(tempPos))
+		if (tempTile != prevTile && !IsPieceInTheWay(tempPos) && !IsCheck(this.isWhite))
 		{
 			if (tempTile.X == prevTile.X || tempTile.Y == prevTile.Y)
 			{
 				if (tempTile.Y - prevTile.Y == -1 || tempTile.Y - prevTile.Y == 1 || tempTile.X - prevTile.X == -1 || tempTile.X - prevTile.X == 1)
 				{
+					hasMoved = true;
+					return true;
+				}
+				if ((tempTile.X - prevTile.X == -2 || tempTile.X - prevTile.X == 2) && hasMoved == false)
+				{
+					hasMoved = true;
 					return true;
 				}
 
@@ -36,6 +42,7 @@ public partial class WKing : ChessPiece
 			{
 				if (yOffset == xOffset || yOffset - xOffset == 0 || yOffset + xOffset == 0)
 				{
+					hasMoved = true;
 					return true;
 				}
 			}

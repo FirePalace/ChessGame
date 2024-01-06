@@ -32,7 +32,7 @@ public bool hasMoved = false;
 	public override bool IsValidMove(Vector2 tempPos, Vector2I tileStart)
 	{
 		Vector2I tempTile = tileMap.FromGlobalPosToTile((Vector2I)tempPos);
-		if (tempTile != tileStart && !IsPieceInTheWay(tempPos))
+		if (tempTile != tileStart && !IsPieceInTheWay(tempPos, tileStart))
 		{
 			if (tempTile.X == tileStart.X || tempTile.Y == tileStart.Y)
 			{

@@ -23,7 +23,7 @@ public partial class WBishop : ChessPiece
 		Vector2I tempTile = tileMap.FromGlobalPosToTile((Vector2I)tempPos);
 		int xOffset = tempTile.X - tileStart.X;
 		int yOffset = tempTile.Y - tileStart.Y;
-		if (tempTile != tileStart && !IsPieceInTheWay(tempPos))
+		if (tempTile != tileStart && !IsPieceInTheWay(tempPos, tileStart))
 		{
 			if (yOffset == xOffset || yOffset - xOffset == 0 || yOffset + xOffset == 0)
 			{
