@@ -81,7 +81,6 @@ public partial class TileMap : Godot.TileMap
 		ChessPiece bQueen = new WQueen();
 		bQueen.isWhite = false;
 
-
 		ChessPiece wKing = new WKing();
 		ChessPiece bKing = new WKing();
 		bKing.isWhite = false;
@@ -101,25 +100,19 @@ public partial class TileMap : Godot.TileMap
 
 		}
 
-
-
 		SpawnPiece(wRook2, "wRook2", "white-rook", new Vector2I(7, 7));
 		SpawnPiece(bRook1, "bRook1", "black-rook", new Vector2I(0, 0));
 		SpawnPiece(bRook2, "bRook2", "black-rook", new Vector2I(7, 0));
-
 
 		SpawnPiece(wBishop2, "wBishop2", "white-bishop", new Vector2I(5, 7));
 		SpawnPiece(bBishop1, "wBishop1", "black-bishop", new Vector2I(2, 0));
 		SpawnPiece(bBishop2, "bBishop2", "black-bishop", new Vector2I(5, 0));
 
-
 		SpawnPiece(wKnight2, "wKnight2", "white-knight", new Vector2I(6, 7));
 		SpawnPiece(bKnight1, "bKnight1", "black-knight", new Vector2I(1, 0));
 		SpawnPiece(bKnight2, "bKnight2", "black-knight", new Vector2I(6, 0));
-
 		
 		SpawnPiece(bQueen, "bQueen", "black-queen", new Vector2I(3, 0));
-
 		
 		SpawnPiece(bKing, "bKing", "black-king", new Vector2I(4, 0));
 	}
@@ -142,7 +135,6 @@ public partial class TileMap : Godot.TileMap
 	{
 		pos.X /= this.RenderingQuadrantSize;
 		pos.Y /= this.RenderingQuadrantSize;
-
 
 		return pos;
 	}

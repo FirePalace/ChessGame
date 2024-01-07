@@ -96,12 +96,12 @@ public partial class ChessPiece : Sprite2D
 			IsDragging = dragState.unknown;
 		}
 
-
 	}
 
 	public bool MoveHandling(Vector2I tempPos, bool isWhitePiece, bool checkWhitesTurn)
 	{
-		if (IsValidMove(tempPos) && !IsCollision(tempPos) && !IsPieceInTheWay(tempPos))
+		//Could have broken something by first checking for !IsPieceInTheWay rather than IsValidMove. Castling stops working if I check IsValidMove first.
+		if (!IsPieceInTheWay(tempPos) && IsValidMove(tempPos) && !IsCollision(tempPos))
 		{
 			this.Position = tempPos;
 			placeInTileCallCount--;
@@ -143,7 +143,7 @@ public partial class ChessPiece : Sprite2D
 		if (IsValidMove(tempPos) && IsCollisionWithOppositeColor(tempPos))
 		{
 
-			ChessPiece pieceToCapture = GetPiece(tempPos);
+			ChessPiece pieceToCapture = GetPieceWithoutSelf(tempPos);
 			if (pieceToCapture != null)
 			{
 				pieceToCapture.ignoreCheck = true;
@@ -310,7 +310,7 @@ public partial class ChessPiece : Sprite2D
 				break;
 			}
 		}
-		//?
+
 		if (listOfTilesToCheck.Count > 0)
 		{
 			listOfTilesToCheck.RemoveAt(0);
@@ -344,9 +344,9 @@ public partial class ChessPiece : Sprite2D
 	public bool IsCollisionWithOppositeColor(Vector2 tempPos)
 	{
 
-		return GetPiece(tempPos) != null;
+		return GetPieceWithoutSelf(tempPos) != null;
 	}
-	public ChessPiece GetPiece(Vector2 tempPos)
+	public ChessPiece GetPieceWithoutSelf(Vector2 tempPos)
 	{
 		foreach (var oNode in node2D.GetChildren())
 		{
@@ -470,20 +470,44 @@ public partial class ChessPiece : Sprite2D
 			}
 		}
 	}
-	public bool IsAllowedToCastle(Vector2I rookPosition)
+	public void CastleHandler(Vector2 targetRookTile, ChessPiece king, string castleDirection)
 	{
+		Vector2 edgeTile00 = new Vector2(0, 0);
+		Vector2 edgeTile07 = new Vector2(0, 7);
+		Vector2 edgeTile70 = new Vector2(7, 0);
+		Vector2 edgeTile77 = new Vector2(7, 7);
+		List<Vector2> edgeTiles = new List<Vector2> { edgeTile00, edgeTile07, edgeTile70, edgeTile77 };
+
 		foreach (var oNode in node2D.GetChildren())
 		{
-			if (oNode is Rook)
+			if (oNode is Rook rook)
 			{
-				Rook chessPiece = (Rook)oNode;
-				if (chessPiece.Position == rookPosition && chessPiece.hasMoved == true)
+				if (rook.Position == tileMap.FromTileToGlobalPos((Vector2I)targetRookTile) && rook.hasMoved == false)
 				{
-					return true;
-				}
+					Vector2 rookTilePos = tileMap.FromGlobalPosToTile((Vector2I)rook.Position);
+					Vector2 kingTilePos = tileMap.FromGlobalPosToTile((Vector2I)king.Position);
 
+					
+					
+						if (castleDirection == "shortCastle")
+						{
+
+							rookTilePos.X = kingTilePos.X - 1;
+							rook.Position = tileMap.FromTileToGlobalPos((Vector2I)rookTilePos);
+							rook.hasMoved = true;
+
+						}
+						if (castleDirection == "longCastle")
+						{
+
+							rookTilePos.X = kingTilePos.X + 1;
+							rook.Position = tileMap.FromTileToGlobalPos((Vector2I)rookTilePos);
+							rook.hasMoved = true;
+						}
+					
+				}
 			}
 		}
-		return false;
 	}
 }
+

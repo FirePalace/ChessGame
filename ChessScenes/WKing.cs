@@ -21,6 +21,19 @@ public partial class WKing : ChessPiece
 		Vector2I tempTile = tileMap.FromGlobalPosToTile((Vector2I)tempPos);
 		int xOffset = tempTile.X - prevTile.X;
 		int yOffset = tempTile.Y - prevTile.Y;
+		int shortCastleDirection;
+		int longCastleDirection;
+
+		if (isWhite)
+		{
+			shortCastleDirection = 2;
+			longCastleDirection = -2;
+		}
+		else
+		{
+			shortCastleDirection = 2;
+			longCastleDirection = -2;
+		}
 
 		if (tempTile != prevTile && !IsPieceInTheWay(tempPos) && !IsCheck(this.isWhite))
 		{
@@ -31,12 +44,42 @@ public partial class WKing : ChessPiece
 					hasMoved = true;
 					return true;
 				}
-				if ((tempTile.X - prevTile.X == -2 || tempTile.X - prevTile.X == 2) && hasMoved == false)
+				if (this.Name == "WKing")
 				{
-					hasMoved = true;
-					return true;
+					if ((tempTile.X - prevTile.X == shortCastleDirection) && hasMoved == false)
+					{
+						CastleHandler( new Vector2(7, 7), this, "shortCastle");
+						GD.Print("CastleHandler called shortCastle");
+						hasMoved = true;
+						return true;
+					}
+					if ((tempTile.X - prevTile.X == longCastleDirection) && hasMoved == false)
+					{
+						CastleHandler (new Vector2(0, 7), this, "longCastle");
+						GD.Print("CastleHandler called longCastle");
+						hasMoved = true;
+						return true;
+					}
 				}
+				else
+				{
+					
 
+					if ((tempTile.X - prevTile.X == shortCastleDirection) && hasMoved == false)
+					{
+						CastleHandler(new Vector2(7, 0), this, "shortCastle");
+						GD.Print("CastleHandler called shortCastle");
+						hasMoved = true;
+						return true;
+					}
+					if ((tempTile.X - prevTile.X == longCastleDirection) && hasMoved == false)
+					{
+						CastleHandler(new Vector2(0, 0), this, "longCastle");
+						GD.Print("CastleHandler called longCastle");
+						hasMoved = true;
+						return true;
+					}
+				}
 			}
 			if (Math.Abs(yOffset) == 1 && Math.Abs(xOffset) == 1)
 			{
