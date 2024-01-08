@@ -472,13 +472,7 @@ public partial class ChessPiece : Sprite2D
 	}
 	public void CastleHandler(Vector2 targetRookTile, ChessPiece king, string castleDirection)
 	{
-		Vector2 edgeTile00 = new Vector2(0, 0);
-		Vector2 edgeTile07 = new Vector2(0, 7);
-		Vector2 edgeTile70 = new Vector2(7, 0);
-		Vector2 edgeTile77 = new Vector2(7, 7);
-		List<Vector2> edgeTiles = new List<Vector2> { edgeTile00, edgeTile07, edgeTile70, edgeTile77 };
-
-		foreach (var oNode in node2D.GetChildren())
+        foreach (var oNode in node2D.GetChildren())
 		{
 			if (oNode is Rook rook)
 			{
@@ -486,8 +480,6 @@ public partial class ChessPiece : Sprite2D
 				{
 					Vector2 rookTilePos = tileMap.FromGlobalPosToTile((Vector2I)rook.Position);
 					Vector2 kingTilePos = tileMap.FromGlobalPosToTile((Vector2I)king.Position);
-
-					
 					
 						if (castleDirection == "shortCastle")
 						{
