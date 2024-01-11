@@ -17,7 +17,7 @@ public partial class TileMap : Godot.TileMap
 				ChessPiece chessPiece = (ChessPiece)oNode;
 				if (chessPiece.Name == "wRook1")
 				{
-					chessPiece.Position =FromTileToGlobalPos(new Vector2I(0, 7));
+					chessPiece.Position = FromTileToGlobalPos(new Vector2I(0, 7));
 					chessPiece.prevTile = new Vector2I(0, 7);
 					chessPiece.ZIndex = 2;
 
@@ -41,13 +41,13 @@ public partial class TileMap : Godot.TileMap
 					chessPiece.prevTile = new Vector2I(1, 7);
 					chessPiece.ZIndex = 2;
 				}
-				if(chessPiece.Name == "WQueen")
+				if (chessPiece.Name == "WQueen")
 				{
 					chessPiece.Position = FromTileToGlobalPos(new Vector2I(3, 7));
 					chessPiece.prevTile = new Vector2I(3, 7);
 					chessPiece.ZIndex = 2;
 				}
-				if(chessPiece.Name == "WKing")
+				if (chessPiece.Name == "WKing")
 				{
 					chessPiece.Position = FromTileToGlobalPos(new Vector2I(4, 7));
 					chessPiece.prevTile = new Vector2I(4, 7);
@@ -111,9 +111,9 @@ public partial class TileMap : Godot.TileMap
 		SpawnPiece(wKnight2, "wKnight2", "white-knight", new Vector2I(6, 7));
 		SpawnPiece(bKnight1, "bKnight1", "black-knight", new Vector2I(1, 0));
 		SpawnPiece(bKnight2, "bKnight2", "black-knight", new Vector2I(6, 0));
-		
+
 		SpawnPiece(bQueen, "bQueen", "black-queen", new Vector2I(3, 0));
-		
+
 		SpawnPiece(bKing, "bKing", "black-king", new Vector2I(4, 0));
 	}
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -138,12 +138,16 @@ public partial class TileMap : Godot.TileMap
 
 		return pos;
 	}
-	public void SpawnPiece(Sprite2D piece, string pieceName, string pieceType, Vector2I tilePosition)
+	public void SpawnPiece(ChessPiece piece, string pieceName, string pieceType, Vector2I tilePosition)
 	{
 
 
 		node2D.CallDeferred("add_child", piece);
 		piece.Name = pieceName;
+		if (pieceType.Contains("black"))
+		{
+			piece.isWhite = false;
+		}
 
 		piece.Texture = (Texture2D)GD.Load("res://ChessAssets/pieces-basic-png/" + pieceType + ".png");
 		piece.Scale = new Godot.Vector2(0.125f, 0.125f);

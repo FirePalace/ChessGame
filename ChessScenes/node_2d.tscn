@@ -1,4 +1,4 @@
-[gd_scene load_steps=21 format=3 uid="uid://ckaj6a805sot7"]
+[gd_scene load_steps=26 format=3 uid="uid://ckaj6a805sot7"]
 
 [ext_resource type="Texture2D" uid="uid://b5jvqgqahaq8p" path="res://ChessAssets/pieces-basic-png/white-rook.png" id="2_7tjy1"]
 [ext_resource type="Texture2D" uid="uid://cr4tj7imnt28v" path="res://ChessScenes/Solid_red.svg.png" id="2_78ug0"]
@@ -14,7 +14,12 @@
 [ext_resource type="Script" path="res://ChessScenes/WKing.cs" id="13_b56y3"]
 [ext_resource type="Texture2D" uid="uid://kuq3yae08bu1" path="res://ChessAssets/pieces-basic-png/white-knight.png" id="14_msr2f"]
 [ext_resource type="Script" path="res://ChessScenes/WQueen.cs" id="16_03cbq"]
+[ext_resource type="Script" path="res://PromotionMenu.cs" id="16_bor5x"]
+[ext_resource type="Texture2D" uid="uid://8fk2de7f6cmm" path="res://ChessAssets/pieces-basic-png/black-queen.png" id="17_urckx"]
+[ext_resource type="Texture2D" uid="uid://ddx3gjcys6ql1" path="res://ChessAssets/pieces-basic-png/black-rook.png" id="18_gvfjc"]
+[ext_resource type="Texture2D" uid="uid://ccd1w65hrd224" path="res://ChessAssets/pieces-basic-png/black-knight.png" id="19_le1b8"]
 [ext_resource type="Script" path="res://ChessScenes/WKnight.cs" id="19_vsqrt"]
+[ext_resource type="Texture2D" uid="uid://cx7tpua1m5fxw" path="res://ChessAssets/pieces-basic-png/black-bishop.png" id="20_ftv8a"]
 
 [sub_resource type="TileMapPattern" id="TileMapPattern_wx6ab"]
 tile_data = PackedInt32Array(0, 196608, 29, 1, 983040, 28)
@@ -12869,3 +12874,52 @@ z_index = 1
 position = Vector2(285, 69)
 scale = Vector2(0.0333333, 0.0333333)
 texture = ExtResource("2_78ug0")
+
+[node name="WhitePromotion" type="OptionButton" parent="."]
+offset_left = 132.0
+offset_top = 11.0
+offset_right = 177.0
+offset_bottom = 31.0
+scale = Vector2(0.325, 0.325)
+expand_icon = true
+item_count = 4
+allow_reselect = true
+popup/item_0/text = ""
+popup/item_0/icon = ExtResource("12_0f05i")
+popup/item_0/id = 0
+popup/item_1/text = ""
+popup/item_1/icon = ExtResource("2_7tjy1")
+popup/item_1/id = 1
+popup/item_2/text = ""
+popup/item_2/icon = ExtResource("14_msr2f")
+popup/item_2/id = 2
+popup/item_3/text = ""
+popup/item_3/icon = ExtResource("8_jyipd")
+popup/item_3/id = 3
+script = ExtResource("16_bor5x")
+
+[node name="BlackPromotion" type="OptionButton" parent="."]
+offset_left = 132.0
+offset_top = 11.0
+offset_right = 177.0
+offset_bottom = 31.0
+scale = Vector2(0.325, 0.325)
+expand_icon = true
+item_count = 4
+allow_reselect = true
+popup/item_0/text = ""
+popup/item_0/icon = ExtResource("17_urckx")
+popup/item_0/id = 0
+popup/item_1/text = ""
+popup/item_1/icon = ExtResource("18_gvfjc")
+popup/item_1/id = 1
+popup/item_2/text = ""
+popup/item_2/icon = ExtResource("19_le1b8")
+popup/item_2/id = 2
+popup/item_3/text = ""
+popup/item_3/icon = ExtResource("20_ftv8a")
+popup/item_3/id = 3
+script = ExtResource("16_bor5x")
+
+[connection signal="item_selected" from="WhitePromotion" to="WhitePromotion" method="_on_item_selected"]
+[connection signal="item_selected" from="BlackPromotion" to="BlackPromotion" method="_on_item_selected_black"]

@@ -1,24 +1,23 @@
 using Godot;
-using Godot.Collections;
 using System;
 using System.Collections.Generic;
-using System.Data.Common;
-using System.Linq.Expressions;
 
 public partial class ChessPiece : Sprite2D
 {
-	public TileMap tileMap;
+	public static TileMap tileMap;
 	dragState IsDragging = dragState.unknown;
 	int placeInTileCallCount;
 	public Vector2I prevTile = new Vector2I(1, 1);
 	public bool isWhite = true;
 	public static bool isWhitesTurn = true;
 	public static En_Passant enPassant = new En_Passant();
-	public Node2D node2D;
+	public static Node2D node2D;
 	Sprite2D redSquare = new Sprite2D();
 	public static bool whiteWasInCheck = false;
 	public static bool blackWasInCheck = false;
 	public bool ignoreCheck = false;
+	OptionButton optionButton = new OptionButton();
+	public static Vector2 promotionPos;
 
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
@@ -100,7 +99,7 @@ public partial class ChessPiece : Sprite2D
 
 	public bool MoveHandling(Vector2I tempPos, bool isWhitePiece, bool checkWhitesTurn)
 	{
-		//Could have broken something by first checking for !IsPieceInTheWay rather than IsValidMove. Castling stops working if I check IsValidMove first.
+
 		if (!IsPieceInTheWay(tempPos) && IsValidMove(tempPos) && !IsCollision(tempPos))
 		{
 			this.Position = tempPos;
@@ -119,8 +118,17 @@ public partial class ChessPiece : Sprite2D
 					Vector2 kingPosition = GetKingTilePos(!checkWhitesTurn);
 					SpawnRedSquare(redSquare, (Vector2I)kingPosition);
 					SetIfKingInCheck(!isWhitePiece, true);
-					isWhitesTurn = !isWhitesTurn;
 
+					if (IsPawnOnPromotionSquare())
+					{
+						SpawnPromotionMenu(isWhitePiece);
+						DestroyPawnOnPromotion(tempPos);
+
+					}
+					else
+					{
+						isWhitesTurn = !isWhitesTurn;
+					}
 				}
 				else
 				{
@@ -132,7 +140,17 @@ public partial class ChessPiece : Sprite2D
 				GD.Print("I should not be in check");
 				RemoveRedSquare();
 				SetIfKingInCheck(!isWhitePiece, false);
-				isWhitesTurn = !isWhitesTurn;
+
+				if (IsPawnOnPromotionSquare())
+				{
+					SpawnPromotionMenu(isWhitePiece);
+					DestroyPawnOnPromotion(tempPos);
+
+				}
+				else
+				{
+					isWhitesTurn = !isWhitesTurn;
+				}
 			}
 			return true;
 		}
@@ -472,7 +490,7 @@ public partial class ChessPiece : Sprite2D
 	}
 	public void CastleHandler(Vector2 targetRookTile, ChessPiece king, string castleDirection)
 	{
-        foreach (var oNode in node2D.GetChildren())
+		foreach (var oNode in node2D.GetChildren())
 		{
 			if (oNode is Rook rook)
 			{
@@ -480,26 +498,173 @@ public partial class ChessPiece : Sprite2D
 				{
 					Vector2 rookTilePos = tileMap.FromGlobalPosToTile((Vector2I)rook.Position);
 					Vector2 kingTilePos = tileMap.FromGlobalPosToTile((Vector2I)king.Position);
-					
-						if (castleDirection == "shortCastle")
-						{
 
-							rookTilePos.X = kingTilePos.X - 1;
-							rook.Position = tileMap.FromTileToGlobalPos((Vector2I)rookTilePos);
-							rook.hasMoved = true;
+					if (castleDirection == "shortCastle")
+					{
 
-						}
-						if (castleDirection == "longCastle")
-						{
+						rookTilePos.X = kingTilePos.X - 1;
+						rook.Position = tileMap.FromTileToGlobalPos((Vector2I)rookTilePos);
+						rook.hasMoved = true;
 
-							rookTilePos.X = kingTilePos.X + 1;
-							rook.Position = tileMap.FromTileToGlobalPos((Vector2I)rookTilePos);
-							rook.hasMoved = true;
-						}
-					
+					}
+					if (castleDirection == "longCastle")
+					{
+
+						rookTilePos.X = kingTilePos.X + 1;
+						rook.Position = tileMap.FromTileToGlobalPos((Vector2I)rookTilePos);
+						rook.hasMoved = true;
+					}
+
 				}
 			}
 		}
 	}
+	public bool IsPawnOnPromotionSquare()
+	{
+		foreach (var oNode in node2D.GetChildren())
+		{
+			if (oNode is WPawn pawn)
+			{
+				Vector2 pawnTilePos = tileMap.FromGlobalPosToTile((Vector2I)pawn.Position);
+				if (pawnTilePos.Y == 0 && pawn.isWhite)
+				{
+					return true;
+				}
+				if (pawnTilePos.Y == 7 && !pawn.isWhite)
+				{
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	public void PromotionHandler(int index, bool isWhite)
+	{
+
+		Vector2 tilePos = tileMap.FromGlobalPosToTile((Vector2I)promotionPos);
+		if (isWhite)
+		{
+			switch (index)
+			{
+				case 0:
+					GD.Print("White Queen");
+					ChessPiece wQueen = new WQueen();
+					tileMap.SpawnPiece(wQueen, "wQueen", "white-queen", (Vector2I)tilePos);
+					HidePromotionMenu();
+					isWhitesTurn = !isWhitesTurn;
+					break;
+				case 1:
+					GD.Print("White Rook");
+					ChessPiece wRook = new Rook();
+					tileMap.SpawnPiece(wRook, "wRook", "white-rook", (Vector2I)tilePos);
+					HidePromotionMenu();
+					isWhitesTurn = !isWhitesTurn;
+					break;
+				case 2:
+					GD.Print("White Knight");
+					ChessPiece wKnight = new WKnight();
+					tileMap.SpawnPiece(wKnight, "wKnight", "white-knight", (Vector2I)tilePos);
+					HidePromotionMenu();
+					isWhitesTurn = !isWhitesTurn;
+					break;
+				case 3:
+					GD.Print("White Bishop");
+					ChessPiece wBishop = new WBishop();
+					tileMap.SpawnPiece(wBishop, "wBishop", "white-bishop", (Vector2I)tilePos);
+					HidePromotionMenu();
+					isWhitesTurn = !isWhitesTurn;
+					break;
+			}
+		}
+		else
+		{
+			switch (index)
+			{
+				case 0:
+					GD.Print("Black Queen");
+					ChessPiece bQueen = new WQueen();
+					tileMap.SpawnPiece(bQueen, "bQueen", "black-queen", (Vector2I)tilePos);
+					HidePromotionMenu();
+					isWhitesTurn = !isWhitesTurn;
+					break;
+				case 1:
+					GD.Print("Black Rook");
+					ChessPiece bRook = new Rook();
+					tileMap.SpawnPiece(bRook, "bRook", "black-rook", (Vector2I)tilePos);
+					HidePromotionMenu();
+					isWhitesTurn = !isWhitesTurn;
+					break;
+				case 2:
+					GD.Print("Black Knight");
+					ChessPiece bKnight = new WKnight();
+					tileMap.SpawnPiece(bKnight, "bKnight", "black-knight", (Vector2I)tilePos);
+					HidePromotionMenu();
+					isWhitesTurn = !isWhitesTurn;
+					break;
+				case 3:
+					GD.Print("Black Bishop");
+					ChessPiece bBishop = new WBishop();
+					tileMap.SpawnPiece(bBishop, "bBishop", "black-bishop", (Vector2I)tilePos);
+					HidePromotionMenu();
+					isWhitesTurn = !isWhitesTurn;
+					break;
+
+			}
+		}
+
+	}
+	public void SpawnPromotionMenu(bool isWhite)
+	{
+		foreach (var oNode in node2D.GetChildren())
+		{
+			if (oNode is OptionButton optionButton)
+			{
+				if (isWhite && optionButton.Name == "WhitePromotion")
+				{
+					optionButton.Visible = true;
+				}
+				if (!isWhite && optionButton.Name == "BlackPromotion")
+				{
+					optionButton.Visible = true;
+				}
+			}
+		}
+	}
+	public void HidePromotionMenu()
+	{
+		foreach (var oNode in node2D.GetChildren())
+		{
+			if (oNode is OptionButton optionButton)
+			{
+				optionButton.Visible = false;
+			}
+		}
+	}
+
+	public void DestroyPawnOnPromotion(Vector2 tempPos)
+	{
+		Vector2 tempTile = tileMap.FromGlobalPosToTile((Vector2I)tempPos);
+		foreach (var oNode in node2D.GetChildren())
+		{
+			if (oNode is WPawn pawn)
+			{
+				if (pawn.Position == tempPos)
+				{
+					promotionPos = tempPos;
+					node2D.CallDeferred("remove_child", pawn);
+				}
+			}
+		}
+	}
+	public Vector2 GetTempPos(Vector2 tempPos)
+	{
+		return tempPos;
+	}
+	public bool isStalemate(){
+		return false;
+	}
+
 }
+
 
