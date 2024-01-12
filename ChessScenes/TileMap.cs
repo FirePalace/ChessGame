@@ -133,8 +133,21 @@ public partial class TileMap : Godot.TileMap
 	}
 	public Vector2I FromGlobalPosToTile(Vector2I pos)
 	{
-		pos.X /= this.RenderingQuadrantSize;
-		pos.Y /= this.RenderingQuadrantSize;
+		if (pos.X < 0)
+		{
+			pos.X -= 100000;
+			pos.X /= this.RenderingQuadrantSize;
+		}
+		else if (pos.Y < 0)
+		{
+			pos.Y -= 100000;
+			pos.Y /= this.RenderingQuadrantSize;
+		}
+		else
+		{
+			pos.X /= this.RenderingQuadrantSize;
+			pos.Y /= this.RenderingQuadrantSize;
+		}
 
 		return pos;
 	}

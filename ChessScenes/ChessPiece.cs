@@ -32,7 +32,7 @@ public partial class ChessPiece : Sprite2D
 		Vector2 MousePos = GetGlobalMousePosition();
 
 		Rect2 inBounds = new Rect2I(0, 0, 128, 128);
-		Rect2 viewport = new Rect2I(-70, -10, 200, 140);
+
 
 		if (IsDragging == dragState.isDragging)
 		{
@@ -45,7 +45,7 @@ public partial class ChessPiece : Sprite2D
 		}
 
 		// OutofBounds
-		if (!inBounds.HasPoint(this.Position) && IsDragging == dragState.isNotDragging && viewport.HasPoint(this.Position))
+		if (!inBounds.HasPoint(this.Position) && IsDragging == dragState.isNotDragging)
 		{
 			//this.Position = tileMap.FromTileToGlobalPos(new Vector2I (3,3));
 			this.Position = tileMap.FromTileToGlobalPos(prevTile);
@@ -75,11 +75,11 @@ public partial class ChessPiece : Sprite2D
 			// Black's turn
 			else
 			{
-				if (this.isWhite == false && MoveHandling((Vector2I)tempPos, this.isWhite, !isWhitesTurn))
+				if (this.isWhite == false && MoveHandling((Vector2I)tempPos, this.isWhite, isWhitesTurn))
 				{
 
 				}
-				else if (this.isWhite == false && CaptureHandling((Vector2I)tempPos, this.isWhite, !isWhitesTurn))
+				else if (this.isWhite == false && CaptureHandling((Vector2I)tempPos, this.isWhite, isWhitesTurn))
 				{
 				}
 				else
@@ -353,13 +353,11 @@ public partial class ChessPiece : Sprite2D
 			listOfTilesToCheck.RemoveAt(0);
 		}
 
-
 		foreach (var oNode in node2D.GetChildren())
 		{
 			if (oNode is ChessPiece)
 			{
 				ChessPiece chessPiece = (ChessPiece)oNode;
-
 
 				Vector2I pieceTile = tileMap.FromGlobalPosToTile((Vector2I)chessPiece.Position);
 
@@ -371,8 +369,6 @@ public partial class ChessPiece : Sprite2D
 						return true;
 					}
 				}
-
-
 			}
 		}
 		return false;
@@ -450,7 +446,8 @@ public partial class ChessPiece : Sprite2D
 				{
 					Vector2I currentTile = tileMap.FromGlobalPosToTile((Vector2I)chessPiece.Position);
 
-					if (chessPiece.IsValidMove(kingPos, currentTile) && !IsPieceInTheWay(kingPos, currentTile))
+
+					if (chessPiece.IsValidMove(kingPos, currentTile) && !chessPiece.IsPieceInTheWay(kingPos, currentTile))
 					{
 						GD.Print("test");
 						return true;
