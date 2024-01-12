@@ -17,7 +17,7 @@ public partial class ChessPiece : Sprite2D
 	public static bool blackWasInCheck = false;
 	public bool ignoreCheck = false;
 	OptionButton optionButton = new OptionButton();
-	public static Vector2 promotionPos;
+	public static Vector2? promotionPos;
 
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
@@ -38,6 +38,10 @@ public partial class ChessPiece : Sprite2D
 		{
 
 			this.Position = MousePos;
+		}
+		if (IsInCheckAfterPromotion())
+		{
+
 		}
 
 		// OutofBounds
@@ -123,7 +127,6 @@ public partial class ChessPiece : Sprite2D
 					{
 						SpawnPromotionMenu(isWhitePiece);
 						DestroyPawnOnPromotion(tempPos);
-
 					}
 					else
 					{
@@ -145,7 +148,6 @@ public partial class ChessPiece : Sprite2D
 				{
 					SpawnPromotionMenu(isWhitePiece);
 					DestroyPawnOnPromotion(tempPos);
-
 				}
 				else
 				{
@@ -184,7 +186,15 @@ public partial class ChessPiece : Sprite2D
 					SetIfKingInCheck(!isWhitePiece, true);
 					GD.Print("piece captured");
 					CapturePiece(tempPos);
-					isWhitesTurn = !isWhitesTurn;
+					if (IsPawnOnPromotionSquare())
+					{
+						SpawnPromotionMenu(isWhitePiece);
+						DestroyPawnOnPromotion(tempPos);
+					}
+					else
+					{
+						isWhitesTurn = !isWhitesTurn;
+					}
 
 				}
 				else
@@ -203,7 +213,16 @@ public partial class ChessPiece : Sprite2D
 				SetIfKingInCheck(!isWhitePiece, false);
 				GD.Print("piece captured");
 				CapturePiece(tempPos);
-				isWhitesTurn = !isWhitesTurn;
+				if (IsPawnOnPromotionSquare())
+				{
+					SpawnPromotionMenu(isWhitePiece);
+					DestroyPawnOnPromotion(tempPos);
+				}
+				else
+				{
+					isWhitesTurn = !isWhitesTurn;
+				}
+
 			}
 			return true;
 		}
@@ -657,14 +676,26 @@ public partial class ChessPiece : Sprite2D
 			}
 		}
 	}
-	public Vector2 GetTempPos(Vector2 tempPos)
+	public bool IsInCheckAfterPromotion()
 	{
-		return tempPos;
-	}
-	public bool isStalemate(){
+		if (promotionPos != null)
+		{
+			Vector2 promotionTile = tileMap.FromGlobalPosToTile((Vector2I)promotionPos);
+			Vector2 thisTilePos = tileMap.FromGlobalPosToTile((Vector2I)this.Position);
+			if (thisTilePos == promotionTile)
+			{
+				if (IsCheck(!isWhite))
+				{
+					GD.Print("I am in check1");
+					Vector2 kingPos = GetKingTilePos(!isWhite);
+					SpawnRedSquare(redSquare, (Vector2I)kingPos);
+					SetIfKingInCheck(!isWhite, true);
+				}
+				promotionPos = null;
+			}
+		}
 		return false;
 	}
-
 }
 
 
