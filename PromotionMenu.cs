@@ -4,7 +4,7 @@ using System;
 public partial class PromotionMenu : OptionButton
 {
 	ChessPiece chessPiece = new ChessPiece();
-		
+
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
@@ -20,7 +20,8 @@ public partial class PromotionMenu : OptionButton
 	{
 		chessPiece.PromotionHandler(index, true);
 	}
-	private void _on_item_selected_black(int index){
+	private void _on_item_selected_black(int index)
+	{
 		chessPiece.PromotionHandler(index, false);
 	}
 }

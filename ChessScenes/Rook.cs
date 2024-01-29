@@ -1,15 +1,8 @@
+using System.Collections.Generic;
 using Godot;
-using System;
-using System.Reflection.Metadata.Ecma335;
-
-using System.Runtime.Serialization;
-
-
-
-
 public partial class Rook : ChessPiece
 {
-public bool hasMoved = false;
+	public bool hasMoved = true;
 
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
@@ -25,8 +18,8 @@ public bool hasMoved = false;
 	}
 	public override bool IsValidMove(Vector2 tempPos)
 	{
-		return IsValidMove( tempPos, prevTile);
-	
+		return IsValidMove(tempPos, prevTile);
+
 
 	}
 	public override bool IsValidMove(Vector2 tempPos, Vector2I tileStart)
@@ -38,7 +31,31 @@ public bool hasMoved = false;
 			{
 				hasMoved = true;
 				return true;
-				
+
+			}
+		}
+		return false;
+	}
+	public override bool HasValidMove()
+	{
+		List<Vector2I> listOfPotentialValidTiles = new List<Vector2I>();
+		Vector2I tileStart = tileMap.FromGlobalPosToTile((Vector2I)this.Position);
+
+
+		for (int i = 0; i < 8; i++)
+		{
+			listOfPotentialValidTiles.Add(new Vector2I(i, tileStart.Y));
+			listOfPotentialValidTiles.Add(new Vector2I(tileStart.X, i));
+		}
+		listOfPotentialValidTiles.RemoveAll(r => r.Equals(tileStart));
+		
+		foreach (Vector2I tile in listOfPotentialValidTiles)
+		{
+			Vector2I tempPos = tileMap.FromTileToGlobalPos(tile);
+			//TODO
+			if (!IsPieceInTheWay(tempPos, tileStart) && (!IsCollision(tempPos) || IsCollisionWithOppositeColor(tempPos)) && IsCheck(this.isWhite) == null)
+			{
+				return true;
 			}
 		}
 		return false;

@@ -1,20 +1,107 @@
 using Godot;
 using System;
+using System.Net.NetworkInformation;
 
 
 public partial class TileMap : Godot.TileMap
 {
 	Node2D node2D;
+	static int callcount = 0;
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
 		node2D = GetNode<Node2D>("..");
+		if (Menu.fenPieces == null)
+		{
+			StandardReady();
+		}
+		else
+		{
+			FENReady();
+		}
+	}
+	public void FENReady()
+	{
+		RemoveAllPieces();
+
+		foreach (FENPiece piece in Menu.fenPieces)
+		{
+			ChessPiece chessPiece = null;
+			if (piece.pieceType.Contains("rook"))
+			{
+				chessPiece = new Rook();
+			}
+			else if (piece.pieceType.Contains("bishop"))
+			{
+				chessPiece = new WBishop();
+			}
+			else if (piece.pieceType.Contains("knight"))
+			{
+				chessPiece = new WKnight();
+			}
+			else if (piece.pieceType.Contains("queen"))
+			{
+				chessPiece = new WQueen();
+			}
+			else if (piece.pieceType.Contains("king"))
+			{
+				chessPiece = new WKing();
+			}
+			else if (piece.pieceType.Contains("pawn"))
+			{
+				chessPiece = new WPawn();
+			}
+
+			SpawnPiece(chessPiece, piece.pieceName, piece.pieceType, piece.tilePos);
+		}
+
+	}
+
+	public void RemoveAllPieces()
+	{
+		foreach (var oNode in node2D.GetChildren())
+		{
+			if (oNode is ChessPiece chessPiece)
+			{
+				node2D.CallDeferred("remove_child", chessPiece);
+			}
+		}
+	}
+	public void AssignCastlingRights()
+	{
+		foreach (var oNode in node2D.GetChildren())
+		{
+			if (oNode is Rook rook)
+			{
+				foreach (Vector2I tile in Menu.castleVectors)
+				{
+					if (tile == FromGlobalPosToTile((Vector2I)rook.Position))
+					{
+						rook.hasMoved = false;
+					}
+				}
+			}
+			if (oNode is WKing king)
+			{
+				if (king.isWhite == true && new Vector2I(4, 7) != FromGlobalPosToTile((Vector2I)king.Position))
+				{
+					king.hasMoved = true;
+				}
+				else if (king.isWhite == false && new Vector2I(4, 0) != FromGlobalPosToTile((Vector2I)king.Position))
+				{
+					king.hasMoved = true;
+				}
+			}
+		}
+	}
+	public void StandardReady()
+	{
+
 
 		foreach (var oNode in node2D.GetChildren())
 		{
-			if (oNode is ChessPiece)
+			if (oNode is ChessPiece chessPiece)
 			{
-				ChessPiece chessPiece = (ChessPiece)oNode;
 				if (chessPiece.Name == "wRook1")
 				{
 					chessPiece.Position = FromTileToGlobalPos(new Vector2I(0, 7));
@@ -41,13 +128,13 @@ public partial class TileMap : Godot.TileMap
 					chessPiece.prevTile = new Vector2I(1, 7);
 					chessPiece.ZIndex = 2;
 				}
-				if (chessPiece.Name == "WQueen")
+				if (chessPiece.Name == "wQueen")
 				{
 					chessPiece.Position = FromTileToGlobalPos(new Vector2I(3, 7));
 					chessPiece.prevTile = new Vector2I(3, 7);
 					chessPiece.ZIndex = 2;
 				}
-				if (chessPiece.Name == "WKing")
+				if (chessPiece.Name == "wKing")
 				{
 					chessPiece.Position = FromTileToGlobalPos(new Vector2I(4, 7));
 					chessPiece.prevTile = new Vector2I(4, 7);
@@ -119,7 +206,11 @@ public partial class TileMap : Godot.TileMap
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
 	public override void _Process(double delta)
 	{
-
+		if (callcount == 0)
+		{
+			AssignCastlingRights();
+			callcount++;
+		}
 	}
 
 	public Vector2I FromTileToGlobalPos(Vector2I pos)

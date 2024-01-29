@@ -29,7 +29,13 @@ text = "Play"
 layout_mode = 2
 text = "Quit"
 
+[node name="FENInput" type="LineEdit" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+placeholder_text = "Enter FEN and press the enter key"
+alignment = 1
+
 [node name="Camera2D" type="Camera2D" parent="."]
 
 [connection signal="pressed" from="MarginContainer/VBoxContainer/Play" to="." method="_on_play_pressed"]
 [connection signal="pressed" from="MarginContainer/VBoxContainer/Quit" to="." method="_on_quit_pressed"]
+[connection signal="text_submitted" from="MarginContainer/VBoxContainer/FENInput" to="." method="on_fen_input_text_submitted"]

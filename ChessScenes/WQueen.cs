@@ -1,5 +1,5 @@
 using Godot;
-using System;
+using System.Collections.Generic;
 
 public partial class WQueen : ChessPiece
 {
@@ -13,12 +13,11 @@ public partial class WQueen : ChessPiece
 	public override void _Process(double delta)
 	{
 		base._Process(delta);
-		
+
 	}
 	public override bool IsValidMove(Vector2 tempPos)
 	{
-		return IsValidMove( tempPos, prevTile);
-	
+		return IsValidMove(tempPos, prevTile);
 
 	}
 	public override bool IsValidMove(Vector2 tempPos, Vector2I tileStart)
@@ -33,7 +32,6 @@ public partial class WQueen : ChessPiece
 				return true;
 			}
 
-
 			if (yOffset == xOffset || yOffset - xOffset == 0 || yOffset + xOffset == 0)
 			{
 				return true;
@@ -41,6 +39,35 @@ public partial class WQueen : ChessPiece
 		}
 		return false;
 	}
+	public override bool HasValidMove()
+	{
+		List<Vector2I> listOfPotentialValidTiles = new List<Vector2I>();
+		Vector2I tileStart = tileMap.FromGlobalPosToTile((Vector2I)this.Position);
+
+		for (int i = 0; i < 8; i++)
+		{
+			listOfPotentialValidTiles.Add(new Vector2I(tileStart.X + i, tileStart.Y + i));
+			listOfPotentialValidTiles.Add(new Vector2I(tileStart.X - i, tileStart.Y - i));
+			listOfPotentialValidTiles.Add(new Vector2I(tileStart.X - i, tileStart.Y + i));
+			listOfPotentialValidTiles.Add(new Vector2I(tileStart.X + i, tileStart.Y - i));
+
+			listOfPotentialValidTiles.Add(new Vector2I(i, tileStart.Y));
+			listOfPotentialValidTiles.Add(new Vector2I(tileStart.X, i));
+		}
+
+		listOfPotentialValidTiles.RemoveAll(r => r.X > 7 || r.X < 0 || r.Y > 7 || r.Y < 0 || r.Equals(tileStart));
+
+		foreach (Vector2I tile in listOfPotentialValidTiles)
+		{
+			Vector2 tempPos = tileMap.FromTileToGlobalPos(tile);
+			//TODO
+			if (!IsPieceInTheWay(tempPos, tileStart) && (!IsCollision(tempPos) || IsCollisionWithOppositeColor(tempPos)) && IsCheck(isWhitesTurn) == null)
+			{
+				return true;
+			}
+
+		}
+		return false;
+	}
 
 }
-

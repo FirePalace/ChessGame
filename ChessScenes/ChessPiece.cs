@@ -2,6 +2,7 @@ using Godot;
 using System;
 using System.Collections.Generic;
 
+
 public partial class ChessPiece : Sprite2D
 {
 	public static TileMap tileMap;
@@ -16,8 +17,11 @@ public partial class ChessPiece : Sprite2D
 	public static bool whiteWasInCheck = false;
 	public static bool blackWasInCheck = false;
 	public bool ignoreCheck = false;
-	OptionButton optionButton = new OptionButton();
 	public static Vector2? promotionPos;
+	public static bool? didWhiteCheckmate;
+	public static bool didStalemateOccur = false;
+	public static int halfMoveClock = 0;
+	public static int fullMoveClock = 1;
 
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
@@ -30,24 +34,19 @@ public partial class ChessPiece : Sprite2D
 	public override void _Process(double delta)
 	{
 		Vector2 MousePos = GetGlobalMousePosition();
-
 		Rect2 inBounds = new Rect2I(0, 0, 128, 128);
-
 
 		if (IsDragging == dragState.isDragging)
 		{
-
 			this.Position = MousePos;
 		}
 		if (IsInCheckAfterPromotion())
 		{
-
 		}
 
 		// OutofBounds
 		if (!inBounds.HasPoint(this.Position) && IsDragging == dragState.isNotDragging)
 		{
-			//this.Position = tileMap.FromTileToGlobalPos(new Vector2I (3,3));
 			this.Position = tileMap.FromTileToGlobalPos(prevTile);
 		}
 
@@ -77,7 +76,6 @@ public partial class ChessPiece : Sprite2D
 			{
 				if (this.isWhite == false && MoveHandling((Vector2I)tempPos, this.isWhite, isWhitesTurn))
 				{
-
 				}
 				else if (this.isWhite == false && CaptureHandling((Vector2I)tempPos, this.isWhite, isWhitesTurn))
 				{
@@ -86,24 +84,20 @@ public partial class ChessPiece : Sprite2D
 				{
 					this.Position = tileMap.FromTileToGlobalPos(prevTile);
 				}
-
 			}
 			if (enPassant.IsValid && enPassant.isWhite == isWhitesTurn)
 			{
 				enPassant.IsValid = false;
 			}
-
 		}
 		if (IsDragging == dragState.isNotDragging)
 		{
 			IsDragging = dragState.unknown;
 		}
-
 	}
 
 	public bool MoveHandling(Vector2I tempPos, bool isWhitePiece, bool checkWhitesTurn)
 	{
-
 		if (!IsPieceInTheWay(tempPos) && IsValidMove(tempPos) && !IsCollision(tempPos))
 		{
 			this.Position = tempPos;
@@ -112,7 +106,7 @@ public partial class ChessPiece : Sprite2D
 			GD.Print("prevTile: " + prevTile);
 			if (IsInCheck())
 			{
-				if (IsCheck(checkWhitesTurn))
+				if (IsCheck(checkWhitesTurn) != null)
 				{
 					this.Position = tileMap.FromTileToGlobalPos(prevTile);
 				}
@@ -122,6 +116,14 @@ public partial class ChessPiece : Sprite2D
 					Vector2 kingPosition = GetKingTilePos(!checkWhitesTurn);
 					SpawnRedSquare(redSquare, (Vector2I)kingPosition);
 					SetIfKingInCheck(!isWhitePiece, true);
+					ChessPiece checkingPiece = IsCheck(!isWhitePiece);
+					//? IsCheckmate
+					if (IsStalemate(isWhitePiece))
+					{
+						didWhiteCheckmate = isWhitePiece;
+						GetTree().ChangeSceneToFile("res://ChessScenes/win_screen.tscn");
+					}
+
 
 					if (IsPawnOnPromotionSquare())
 					{
@@ -149,6 +151,11 @@ public partial class ChessPiece : Sprite2D
 					SpawnPromotionMenu(isWhitePiece);
 					DestroyPawnOnPromotion(tempPos);
 				}
+				if (IsStalemate(isWhitePiece))
+				{
+					didStalemateOccur = true;
+					GetTree().ChangeSceneToFile("res://ChessScenes/win_screen.tscn");
+				}
 				else
 				{
 					isWhitesTurn = !isWhitesTurn;
@@ -170,7 +177,7 @@ public partial class ChessPiece : Sprite2D
 			}
 			if (IsInCheck())
 			{
-				if (IsCheck(checkWhitesTurn))
+				if (IsCheck(checkWhitesTurn) != null)
 				{
 					if (pieceToCapture != null)
 					{
@@ -186,6 +193,14 @@ public partial class ChessPiece : Sprite2D
 					SetIfKingInCheck(!isWhitePiece, true);
 					GD.Print("piece captured");
 					CapturePiece(tempPos);
+					ChessPiece checkingPiece = IsCheck(!isWhitePiece);
+					//? IsCheckmate
+					if (IsStalemate(isWhitePiece))
+					{
+						didWhiteCheckmate = isWhitePiece;
+						GetTree().ChangeSceneToFile("res://ChessScenes/win_screen.tscn");
+					}
+
 					if (IsPawnOnPromotionSquare())
 					{
 						SpawnPromotionMenu(isWhitePiece);
@@ -218,6 +233,11 @@ public partial class ChessPiece : Sprite2D
 					SpawnPromotionMenu(isWhitePiece);
 					DestroyPawnOnPromotion(tempPos);
 				}
+				if (IsStalemate(isWhitePiece))
+				{
+					didStalemateOccur = true;
+					GetTree().ChangeSceneToFile("res://ChessScenes/win_screen.tscn");
+				}
 				else
 				{
 					isWhitesTurn = !isWhitesTurn;
@@ -227,7 +247,6 @@ public partial class ChessPiece : Sprite2D
 			return true;
 		}
 		return false;
-
 	}
 	public void SetIfKingInCheck(bool isWhite, bool value)
 	{
@@ -271,10 +290,10 @@ public partial class ChessPiece : Sprite2D
 			}
 		}
 	}
-	public Vector2I PrevTile()
+	public void PrevTile()
 	{
 		prevTile = tileMap.FromGlobalPosToTile((Vector2I)this.Position);
-		return prevTile;
+
 	}
 
 	public virtual bool IsValidMove(Vector2 tempPos)
@@ -290,9 +309,8 @@ public partial class ChessPiece : Sprite2D
 	{
 		foreach (var oNode in node2D.GetChildren())
 		{
-			if (oNode is ChessPiece)
+			if (oNode is ChessPiece chessPiece)
 			{
-				ChessPiece chessPiece = (ChessPiece)oNode;
 				if (chessPiece != this)
 				{
 					Vector2I pieceTile = tileMap.FromGlobalPosToTile((Vector2I)chessPiece.Position);
@@ -318,40 +336,9 @@ public partial class ChessPiece : Sprite2D
 	}
 	public virtual bool IsPieceInTheWay(Vector2 tempPos, Vector2I tileStart)
 	{
-		Vector2I tempTile = tileMap.FromGlobalPosToTile((Vector2I)tempPos);
-		List<Vector2I> listOfTilesToCheck = new List<Vector2I>();
-		//listOfTilesToCheck.Add(tempTile);
-		Vector2I diffVector = tempTile - tileStart;
-		Vector2I destinationTile = tileStart;
-		while (destinationTile != tempTile)
-		{
-			listOfTilesToCheck.Add(destinationTile);
-			if (diffVector.X > 0)
-			{
-				destinationTile.X++;
-			}
-			if (diffVector.X < 0)
-			{
-				destinationTile.X--;
-			}
-			if (diffVector.Y > 0)
-			{
-				destinationTile.Y++;
-			}
-			if (diffVector.Y < 0)
-			{
-				destinationTile.Y--;
-			}
-			if (listOfTilesToCheck.Count > 9)
-			{
-				break;
-			}
-		}
+		Vector2 tempTile = tileMap.FromGlobalPosToTile((Vector2I)tempPos);
+		List<Vector2I> listOfTilesToCheck = GetPath(tempPos, tileStart);
 
-		if (listOfTilesToCheck.Count > 0)
-		{
-			listOfTilesToCheck.RemoveAt(0);
-		}
 
 		foreach (var oNode in node2D.GetChildren())
 		{
@@ -376,8 +363,13 @@ public partial class ChessPiece : Sprite2D
 
 	public bool IsCollisionWithOppositeColor(Vector2 tempPos)
 	{
-
-		return GetPieceWithoutSelf(tempPos) != null;
+		ChessPiece chessPiece = GetPieceWithoutSelf(tempPos);
+		return chessPiece != null && chessPiece.isWhite != this.isWhite;
+	}
+	public bool IsCollisionWithSameColor(Vector2 tempPos)
+	{
+		ChessPiece chessPiece = GetPieceWithoutSelf(tempPos);
+		return chessPiece != null && chessPiece.isWhite == this.isWhite;
 	}
 	public ChessPiece GetPieceWithoutSelf(Vector2 tempPos)
 	{
@@ -391,11 +383,10 @@ public partial class ChessPiece : Sprite2D
 					Vector2I pieceTile = tileMap.FromGlobalPosToTile((Vector2I)chessPiece.Position);
 					Vector2I tempTile = tileMap.FromGlobalPosToTile((Vector2I)tempPos);
 
-					if (tempTile.X == pieceTile.X && tempTile.Y == pieceTile.Y && this.isWhite != chessPiece.isWhite)
+					if (tempTile == pieceTile)
 					{
 						GD.Print("Opposite color");
 						return chessPiece;
-
 					}
 				}
 			}
@@ -418,7 +409,6 @@ public partial class ChessPiece : Sprite2D
 					{
 						node2D.CallDeferred("remove_child", chessPiece);
 						this.Position = tileMap.FromTileToGlobalPos(tempTile);
-
 					}
 				}
 			}
@@ -427,14 +417,14 @@ public partial class ChessPiece : Sprite2D
 	public bool IsInCheck()
 	{
 
-		return IsCheck(true) || IsCheck(false);
+		return IsCheck(true) != null || IsCheck(false) != null;
 	}
-	public bool IsCheck(bool isWhite)
+	public ChessPiece IsCheck(bool isWhite)
 	{
 		Vector2I kingPos = tileMap.FromTileToGlobalPos((Vector2I)GetKingTilePos(isWhite));
 		return IsCheck(kingPos, isWhite);
 	}
-	public bool IsCheck(Vector2I kingPos, bool isWhite)
+	public ChessPiece IsCheck(Vector2I kingPos, bool isWhite)
 	{
 		foreach (var oNode in node2D.GetChildren())
 		{
@@ -446,17 +436,15 @@ public partial class ChessPiece : Sprite2D
 				{
 					Vector2I currentTile = tileMap.FromGlobalPosToTile((Vector2I)chessPiece.Position);
 
-
 					if (chessPiece.IsValidMove(kingPos, currentTile) && !chessPiece.IsPieceInTheWay(kingPos, currentTile))
 					{
-						GD.Print("test");
-						return true;
-					}
 
+						return chessPiece;
+					}
 				}
 			}
 		}
-		return false;
+		return null;
 	}
 
 	public Vector2 GetKingTilePos(bool isWhite)
@@ -467,7 +455,7 @@ public partial class ChessPiece : Sprite2D
 			{
 				ChessPiece chessPiece = (ChessPiece)oNode;
 
-				if (isWhite && chessPiece.Name == "WKing")
+				if (isWhite && chessPiece.Name == "wKing")
 				{
 					return tileMap.FromGlobalPosToTile((Vector2I)chessPiece.Position);
 				}
@@ -517,7 +505,6 @@ public partial class ChessPiece : Sprite2D
 
 					if (castleDirection == "shortCastle")
 					{
-
 						rookTilePos.X = kingTilePos.X - 1;
 						rook.Position = tileMap.FromTileToGlobalPos((Vector2I)rookTilePos);
 						rook.hasMoved = true;
@@ -534,6 +521,20 @@ public partial class ChessPiece : Sprite2D
 				}
 			}
 		}
+	}
+	public bool HasTargetRookMoved(Vector2I tile)
+	{
+		foreach (var oNode in node2D.GetChildren())
+		{
+			if (oNode is Rook rook)
+			{
+				if (tile == tileMap.FromGlobalPosToTile((Vector2I)rook.Position) && rook.hasMoved == false)
+				{
+					return false;
+				}
+			}
+		}
+		return true;
 	}
 	public bool IsPawnOnPromotionSquare()
 	{
@@ -681,18 +682,95 @@ public partial class ChessPiece : Sprite2D
 			Vector2 thisTilePos = tileMap.FromGlobalPosToTile((Vector2I)this.Position);
 			if (thisTilePos == promotionTile)
 			{
-				if (IsCheck(!isWhite))
+				if (IsCheck(!isWhite) != null)
 				{
 					GD.Print("I am in check1");
 					Vector2 kingPos = GetKingTilePos(!isWhite);
 					SpawnRedSquare(redSquare, (Vector2I)kingPos);
 					SetIfKingInCheck(!isWhite, true);
+					ChessPiece checkingPiece = IsCheck(!isWhite);
+					//? IsCheckmate
+					if (IsStalemate(isWhite))
+					{
+						didWhiteCheckmate = isWhite;
+						GetTree().ChangeSceneToFile("res://ChessScenes/win_screen.tscn");
+					}
+				}
+				if (IsStalemate(isWhite))
+				{
+					didStalemateOccur = true;
+					GetTree().ChangeSceneToFile("res://ChessScenes/win_screen.tscn");
 				}
 				promotionPos = null;
 			}
 		}
 		return false;
 	}
+	public bool IsStalemate(bool isWhite)
+	{
+		foreach (var oNode in node2D.GetChildren())
+		{
+			if (oNode is ChessPiece chessPiece)
+			{
+				if (chessPiece.isWhite == !isWhite)
+				{
+					if (chessPiece.Position == new Vector2I(24, 8))
+					{
+						GD.Print("lol");
+					}
+					if (chessPiece.HasValidMove())
+					{
+						return false;
+					}
+				}
+			}
+		}
+		return true;
+	}
+	public virtual bool HasValidMove()
+	{
+		return false;
+	}
+	public List<Vector2I> GetPath(Vector2 tempPos, Vector2I tileStart)
+	{
+		Vector2I tempTile = tileMap.FromGlobalPosToTile((Vector2I)tempPos);
+		List<Vector2I> listOfTilesToCheck = new List<Vector2I>();
+		Vector2I diffVector = tempTile - tileStart;
+		Vector2I destinationTile = tileStart;
+		while (destinationTile != tempTile)
+		{
+			listOfTilesToCheck.Add(destinationTile);
+			if (diffVector.X > 0)
+			{
+				destinationTile.X++;
+			}
+			if (diffVector.X < 0)
+			{
+				destinationTile.X--;
+			}
+			if (diffVector.Y > 0)
+			{
+				destinationTile.Y++;
+			}
+			if (diffVector.Y < 0)
+			{
+				destinationTile.Y--;
+			}
+			if (destinationTile.X > 7 || destinationTile.X < 0 || destinationTile.Y > 7 || destinationTile.Y < 0)
+			{
+				break;
+			}
+
+		}
+		if (listOfTilesToCheck.Count > 0)
+		{
+			listOfTilesToCheck.RemoveAt(0);
+
+		}
+		return listOfTilesToCheck;
+
+	}
+
 }
 
 

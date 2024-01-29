@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Collections.Generic;
 
 public partial class WKing : ChessPiece
 {
@@ -18,78 +19,123 @@ public partial class WKing : ChessPiece
 	}
 	public override bool IsValidMove(Vector2 tempPos)
 	{
-		Vector2I tempTile = tileMap.FromGlobalPosToTile((Vector2I)tempPos);
-		int xOffset = tempTile.X - prevTile.X;
-		int yOffset = tempTile.Y - prevTile.Y;
-		int shortCastleDirection;
-		int longCastleDirection;
+		return IsValidMove(tempPos, prevTile);
 
-		if (isWhite)
+	}
+	public override bool IsValidMove(Vector2 tempPos, Vector2I tileStart)
+	{
+		this.ignoreCheck = true;
+		try
 		{
-			shortCastleDirection = 2;
-			longCastleDirection = -2;
-		}
-		else
-		{
-			shortCastleDirection = 2;
-			longCastleDirection = -2;
-		}
+			Vector2I tempTile = tileMap.FromGlobalPosToTile((Vector2I)tempPos);
+			int xOffset = tempTile.X - tileStart.X;
+			int yOffset = tempTile.Y - tileStart.Y;
+			int shortCastleDirection;
+			int longCastleDirection;
 
-		if (tempTile != prevTile && !IsPieceInTheWay(tempPos) && !IsCheck(this.isWhite))
-		{
-			if (tempTile.X == prevTile.X || tempTile.Y == prevTile.Y)
+			if (isWhite)
 			{
-				if (tempTile.Y - prevTile.Y == -1 || tempTile.Y - prevTile.Y == 1 || tempTile.X - prevTile.X == -1 || tempTile.X - prevTile.X == 1)
-				{
-					hasMoved = true;
-					return true;
-				}
-				if (this.Name == "WKing")
-				{
-					if ((tempTile.X - prevTile.X == shortCastleDirection) && hasMoved == false)
-					{
-						CastleHandler( new Vector2(7, 7), this, "shortCastle");
-						GD.Print("CastleHandler called shortCastle");
-						hasMoved = true;
-						return true;
-					}
-					if ((tempTile.X - prevTile.X == longCastleDirection) && hasMoved == false)
-					{
-						CastleHandler (new Vector2(0, 7), this, "longCastle");
-						GD.Print("CastleHandler called longCastle");
-						hasMoved = true;
-						return true;
-					}
-				}
-				else
-				{
-					
+				shortCastleDirection = 2;
+				longCastleDirection = -2;
+			}
+			else
+			{
+				shortCastleDirection = 2;
+				longCastleDirection = -2;
+			}
 
-					if ((tempTile.X - prevTile.X == shortCastleDirection) && hasMoved == false)
+			if (tempTile != tileStart && !IsPieceInTheWay(tempPos) && IsCheck(this.isWhite) == null)
+			{
+				if (tempTile.X == tileStart.X || tempTile.Y == tileStart.Y)
+				{
+					if (tempTile.Y - tileStart.Y == -1 || tempTile.Y - tileStart.Y == 1 || tempTile.X - tileStart.X == -1 || tempTile.X - tileStart.X == 1)
 					{
-						CastleHandler(new Vector2(7, 0), this, "shortCastle");
-						GD.Print("CastleHandler called shortCastle");
 						hasMoved = true;
 						return true;
 					}
-					if ((tempTile.X - prevTile.X == longCastleDirection) && hasMoved == false)
+					if (this.Name == "wKing")
 					{
-						CastleHandler(new Vector2(0, 0), this, "longCastle");
-						GD.Print("CastleHandler called longCastle");
+						if ((tempTile.X - tileStart.X == shortCastleDirection) && hasMoved == false && !HasTargetRookMoved(new Vector2I(7, 7)))
+						{
+							CastleHandler(new Vector2(7, 7), this, "shortCastle");
+							GD.Print("CastleHandler called shortCastle");
+							hasMoved = true;
+							return true;
+						}
+						if ((tempTile.X - tileStart.X == longCastleDirection) && hasMoved == false && !HasTargetRookMoved(new Vector2I(0, 7)))
+						{
+							CastleHandler(new Vector2(0, 7), this, "longCastle");
+							GD.Print("CastleHandler called longCastle");
+							hasMoved = true;
+							return true;
+						}
+					}
+					else
+					{
+
+
+						if ((tempTile.X - tileStart.X == shortCastleDirection) && hasMoved == false && !HasTargetRookMoved(new Vector2I(7, 0)))
+						{
+							CastleHandler(new Vector2(7, 0), this, "shortCastle");
+							GD.Print("CastleHandler called shortCastle");
+							hasMoved = true;
+							return true;
+						}
+						if ((tempTile.X - tileStart.X == longCastleDirection) && hasMoved == false && !HasTargetRookMoved(new Vector2I(0, 0)))
+						{
+							CastleHandler(new Vector2(0, 0), this, "longCastle");
+							GD.Print("CastleHandler called longCastle");
+							hasMoved = true;
+							return true;
+						}
+					}
+				}
+				if (Math.Abs(yOffset) == 1 && Math.Abs(xOffset) == 1)
+				{
+					if (yOffset == xOffset || yOffset - xOffset == 0 || yOffset + xOffset == 0)
+					{
 						hasMoved = true;
 						return true;
 					}
 				}
 			}
-			if (Math.Abs(yOffset) == 1 && Math.Abs(xOffset) == 1)
+		}
+		finally
+		{
+			this.ignoreCheck = false;
+		}
+		return false;
+	}
+	public override bool HasValidMove()
+	{
+		List<Vector2I> listOfPotentialValidTiles = new List<Vector2I>();
+		Vector2I tileStart = tileMap.FromGlobalPosToTile((Vector2I)this.Position);
+
+		listOfPotentialValidTiles.Add(new Vector2I(tileStart.X, tileStart.Y + 1));
+		listOfPotentialValidTiles.Add(new Vector2I(tileStart.X, tileStart.Y - 1));
+		listOfPotentialValidTiles.Add(new Vector2I(tileStart.X + 1, tileStart.Y));
+		listOfPotentialValidTiles.Add(new Vector2I(tileStart.X - 1, tileStart.Y));
+
+		listOfPotentialValidTiles.Add(new Vector2I(tileStart.X - 1, tileStart.Y - 1));
+		listOfPotentialValidTiles.Add(new Vector2I(tileStart.X + 1, tileStart.Y + 1));
+		listOfPotentialValidTiles.Add(new Vector2I(tileStart.X - 1, tileStart.Y + 1));
+		listOfPotentialValidTiles.Add(new Vector2I(tileStart.X + 1, tileStart.Y - 1));
+
+		listOfPotentialValidTiles.RemoveAll(r => r.X > 7 || r.X < 0 || r.Y > 7 || r.Y < 0 || r.Equals(tileStart));
+
+		foreach (Vector2I tile in listOfPotentialValidTiles)
+		{
+			Vector2I tempPos = tileMap.FromTileToGlobalPos(tile);
+
+
+			//TODO
+			if ((!IsCollision(tempPos) || IsCollisionWithOppositeColor(tempPos)) && !IsPieceInTheWay(tempPos, tileStart) && IsCheck(tempPos, this.isWhite) == null)
 			{
-				if (yOffset == xOffset || yOffset - xOffset == 0 || yOffset + xOffset == 0)
-				{
-					hasMoved = true;
-					return true;
-				}
+				return true;
 			}
 		}
+
+
 
 		return false;
 	}

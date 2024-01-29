@@ -12830,37 +12830,37 @@ layer_0/tile_data = PackedInt32Array(0, 196608, 29, 1, 983040, 28, 65536, 589824
 script = ExtResource("2_mp1fm")
 
 [node name="wRook1" type="Sprite2D" parent="."]
-position = Vector2(283, 46)
+position = Vector2(39, 48)
 scale = Vector2(0.125, 0.125065)
 texture = ExtResource("2_7tjy1")
 script = ExtResource("4_65a2u")
 
 [node name="wPawn" type="Sprite2D" parent="."]
-position = Vector2(280, 40)
+position = Vector2(75, 54)
 scale = Vector2(0.125, 0.125)
 texture = ExtResource("6_liopi")
 script = ExtResource("7_un00v")
 
 [node name="wBishop1" type="Sprite2D" parent="."]
-position = Vector2(285, 49)
+position = Vector2(65, 78)
 scale = Vector2(0.125, 0.125)
 texture = ExtResource("8_jyipd")
 script = ExtResource("10_63tlf")
 
 [node name="WKing" type="Sprite2D" parent="."]
-position = Vector2(284, 48)
+position = Vector2(48, 66)
 scale = Vector2(0.125, 0.125)
 texture = ExtResource("10_rb8mn")
 script = ExtResource("13_b56y3")
 
 [node name="WQueen" type="Sprite2D" parent="."]
-position = Vector2(284, 48)
+position = Vector2(92, 62)
 scale = Vector2(0.125, 0.125)
 texture = ExtResource("12_0f05i")
 script = ExtResource("16_03cbq")
 
 [node name="wKnight1" type="Sprite2D" parent="."]
-position = Vector2(281, 45)
+position = Vector2(65, 41)
 scale = Vector2(0.13, 0.13)
 texture = ExtResource("14_msr2f")
 script = ExtResource("19_vsqrt")

@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Collections.Generic;
 
 
 public partial class WPawn : ChessPiece
@@ -20,7 +21,7 @@ public partial class WPawn : ChessPiece
 	}
 	public override bool IsValidMove(Vector2 tempPos)
 	{
-		return IsValidMove( tempPos, prevTile);
+		return IsValidMove(tempPos, prevTile);
 	}
 	public override bool IsValidMove(Vector2 tempPos, Vector2I tileStart)
 	{
@@ -102,8 +103,64 @@ public partial class WPawn : ChessPiece
 		}
 		return false;
 	}
+	public override bool HasValidMove()
+	{
+		int direction;
 
+		if (isWhite)
+		{
+			direction = -1;
+		}
+		else
+		{
+			direction = 1;
+		}
+
+		List<Vector2I> listOfPotentialValidTiles = new List<Vector2I>();
+		Vector2I tileStart = tileMap.FromGlobalPosToTile((Vector2I)this.Position);
+
+		listOfPotentialValidTiles.Add(new Vector2I(tileStart.X, tileStart.Y + direction));
+		listOfPotentialValidTiles.Add(new Vector2I(tileStart.X, tileStart.Y + 2 * direction));
+
+		//I know its ugly but it is what it is
+		if (IsCollisionWithOppositeColor(tileMap.FromTileToGlobalPos(new Vector2I(tileStart.X + 1, tileStart.Y + direction)))
+		|| (enPassant.IsValid && enPassant.isWhite == !isWhite && enPassant.currentTile == new Vector2I(tileStart.X + 1, tileStart.Y + direction)))
+		{
+			listOfPotentialValidTiles.Add(new Vector2I(tileStart.X + 1, tileStart.Y + direction));
+		}
+		if (IsCollisionWithOppositeColor(tileMap.FromTileToGlobalPos(new Vector2I(tileStart.X - 1, tileStart.Y + direction)))
+		|| (enPassant.IsValid && enPassant.isWhite == !isWhite && enPassant.currentTile == new Vector2I(tileStart.X - 1, tileStart.Y + direction)))
+		{
+			listOfPotentialValidTiles.Add(new Vector2I(tileStart.X - 1, tileStart.Y + direction));
+		}
+
+
+		listOfPotentialValidTiles.RemoveAll(r => r.X > 7 || r.X < 0 || r.Y > 7 || r.Y < 0 || r.Equals(tileStart));
+
+		if (hasMoved == true)
+		{
+			listOfPotentialValidTiles.RemoveAll(r => r.Equals(new Vector2I(tileStart.X, tileStart.Y + 2 * direction)));
+		}
+
+		
+
+		foreach (Vector2I tile in listOfPotentialValidTiles)
+		{
+			Vector2I tempPos = tileMap.FromTileToGlobalPos(tile);
+
+
+			//TODO
+			if (!IsCollisionWithSameColor(tempPos) && !IsPieceInTheWay(tempPos, tileStart) && IsCheck(this.isWhite) == null)
+			{
+				return true;
+			}
+		}
+
+		return false;
+
+	}
 }
+
 public struct En_Passant
 {
 	public Vector2I? currentTile;
@@ -111,7 +168,7 @@ public struct En_Passant
 	public ChessPiece chessPiece;
 	public bool IsValid
 	{
-        get
+		get
 		{
 			return chessPiece != null;
 		}
