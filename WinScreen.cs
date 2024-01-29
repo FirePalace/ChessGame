@@ -23,10 +23,12 @@ public partial class WinScreen : Control
 					gameOutcomeText.Text = "[font_size={20}][center]White has won by checkmate! ";
 					break;
 			}
+			ChessPiece.didWhiteCheckmate = null;
 		}
 		else if (ChessPiece.didStalemateOccur == true)
 		{
 			gameOutcomeText.Text = "[font_size={20}][center]Stalemate :( ";
+			ChessPiece.didStalemateOccur = false;
 		}
 	}
 
