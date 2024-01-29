@@ -94,6 +94,7 @@ public partial class TileMap : Godot.TileMap
 		{
 			AssignCastlingRights();
 			callcount++;
+
 		}
 	}
 

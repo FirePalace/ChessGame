@@ -24,14 +24,29 @@ public partial class ChessPiece : Sprite2D
 	public static int fullMoveClock = 1;
 
 	// Called when the node enters the scene tree for the first time.
-	
+
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
 	public override void _Process(double delta)
 	{
 		Vector2 MousePos = GetGlobalMousePosition();
 		Rect2 inBounds = new Rect2I(0, 0, 128, 128);
-
+		
+		// Does FEN have an EnPassant square?
+		if (Menu.enPassantVector != new Vector2I(0, 0))
+		{
+			enPassant.isWhite = !isWhitesTurn;
+			enPassant.currentTile = Menu.enPassantVector;
+			if (enPassant.isWhite)
+			{
+				enPassant.chessPiece = GetEnPassantPiece(new Vector2I(Menu.enPassantVector.X, Menu.enPassantVector.Y - 1));
+			}
+			else
+			{
+				enPassant.chessPiece = GetEnPassantPiece(new Vector2I(Menu.enPassantVector.X, Menu.enPassantVector.Y + 1));
+			}
+			Menu.enPassantVector = new Vector2I(0, 0);
+		}
 		if (IsDragging == dragState.isDragging)
 		{
 			this.Position = MousePos;
@@ -468,21 +483,8 @@ public partial class ChessPiece : Sprite2D
 		node2D = GetNode<Node2D>("..");
 		tileMap = node2D.GetNode<TileMap>("Tilemap");
 
+		//TODO
 
-		if (Menu.enPassantVector != new Vector2I(0, 0))
-		{
-			enPassant.isWhite = isWhitesTurn;
-			enPassant.currentTile = Menu.enPassantVector;
-			if (enPassant.isWhite)
-			{
-				enPassant.chessPiece = GetEnPassantPiece(new Vector2I(Menu.enPassantVector.X, Menu.enPassantVector.Y + 1));
-			}
-			else
-			{
-				enPassant.chessPiece = GetEnPassantPiece(new Vector2I(Menu.enPassantVector.X, Menu.enPassantVector.Y - 1));
-			}
-
-		}
 
 	}
 	public void SpawnRedSquare(Sprite2D piece, Vector2I tilePosition)
@@ -798,7 +800,6 @@ public partial class ChessPiece : Sprite2D
 			}
 		}
 		throw new ArgumentException("Pawn cannot be null;");
-
 	}
 }
 

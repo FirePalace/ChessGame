@@ -7,7 +7,7 @@ public partial class Menu : Control
 {
 	public static List<FENPiece> fenPieces = null;
 	public static List<Vector2I> castleVectors = new List<Vector2I>();
-	public static Vector2I enPassantVector;
+	public static Vector2I enPassantVector = new Vector2I(0, 0);
 	private void _on_play_pressed()
 	{
 		on_fen_input_text_submitted("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
@@ -52,6 +52,7 @@ public partial class Menu : Control
 			}
 
 			CastlingRights(castlingRights);
+			ConvertStringToEnPassantVector(enPassantSquare);
 
 			//Generate a list of all Pieces that need to be placed
 			fenPieces = new List<FENPiece>();
@@ -129,7 +130,7 @@ public partial class Menu : Control
 	}
 	private void ConvertStringToEnPassantVector(string enPassantSquare)
 	{
-		Dictionary<char, int> charToXCoordinate = new Dictionary<char, int>()
+		Dictionary<char, int> charToCoordinate = new Dictionary<char, int>()
 		{
 			['a'] = 0,
 			['b'] = 1,
@@ -139,6 +140,8 @@ public partial class Menu : Control
 			['f'] = 5,
 			['g'] = 6,
 			['h'] = 7,
+			['3'] = 5,
+			['6'] = 2,
 		};
 		Vector2I tempVector = new Vector2I();
 		foreach (char c in enPassantSquare)
@@ -149,11 +152,11 @@ public partial class Menu : Control
 			}
 			else if (char.IsLetter(c))
 			{
-				tempVector.X = charToXCoordinate[c];
+				tempVector.X = charToCoordinate[c];
 			}
 			else if (char.IsDigit(c))
 			{
-				tempVector.Y = c - '0';
+				tempVector.Y = charToCoordinate[c];
 			}
 		}
 		enPassantVector = tempVector;
