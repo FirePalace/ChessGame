@@ -44,6 +44,10 @@ public partial class Menu : Control
 			{
 				ChessPiece.isWhitesTurn = false;
 			}
+			else
+			{
+				ChessPiece.isWhitesTurn = true;
+			}
 
 			CastlingRights(castlingRights);
 
@@ -101,7 +105,7 @@ public partial class Menu : Control
 	}
 	private void CastlingRights(string castlingRights)
 	{
-		 
+
 		foreach (char c in castlingRights)
 		{
 			switch (c)

@@ -23,16 +23,24 @@ layout_mode = 2
 layout_mode = 2
 text = "Quit"
 
+[node name="PlayAgain" type="Button" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Play again?
+"
+
 [node name="Camera2D" type="Camera2D" parent="."]
 
 [node name="GameOutcomeText" type="RichTextLabel" parent="."]
 layout_mode = 0
-offset_left = -145.0
-offset_top = -5.0
-offset_right = 146.715
-offset_bottom = 28.8
-text = "fffffff"
+offset_left = -184.0
+offset_top = -3.0
+offset_right = 185.11
+offset_bottom = 30.8
+bbcode_enabled = true
+text = "[center][font_size={25}] fffffffffeefefef"
 fit_content = true
+scroll_active = false
 
 [connection signal="pressed" from="MarginContainer/VBoxContainer/Quit" to="." method="_on_quit_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/PlayAgain" to="." method="_on_play_again_pressed"]
 [connection signal="finished" from="GameOutcomeText" to="." method="_on_game_outcome_text_finished"]

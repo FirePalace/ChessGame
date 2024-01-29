@@ -127,8 +127,6 @@ public partial class WKing : ChessPiece
 		{
 			Vector2I tempPos = tileMap.FromTileToGlobalPos(tile);
 
-
-			//TODO
 			if ((!IsCollision(tempPos) || IsCollisionWithOppositeColor(tempPos)) && !IsPieceInTheWay(tempPos, tileStart) && IsCheck(tempPos, this.isWhite) == null)
 			{
 				return true;

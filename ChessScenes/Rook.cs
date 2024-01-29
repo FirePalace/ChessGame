@@ -31,7 +31,6 @@ public partial class Rook : ChessPiece
 			{
 				hasMoved = true;
 				return true;
-
 			}
 		}
 		return false;
@@ -52,7 +51,6 @@ public partial class Rook : ChessPiece
 		foreach (Vector2I tile in listOfPotentialValidTiles)
 		{
 			Vector2I tempPos = tileMap.FromTileToGlobalPos(tile);
-			//TODO
 			if (!IsPieceInTheWay(tempPos, tileStart) && (!IsCollision(tempPos) || IsCollisionWithOppositeColor(tempPos)) && IsCheck(this.isWhite) == null)
 			{
 				return true;

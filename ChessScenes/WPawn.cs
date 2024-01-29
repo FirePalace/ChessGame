@@ -134,7 +134,6 @@ public partial class WPawn : ChessPiece
 			listOfPotentialValidTiles.Add(new Vector2I(tileStart.X - 1, tileStart.Y + direction));
 		}
 
-
 		listOfPotentialValidTiles.RemoveAll(r => r.X > 7 || r.X < 0 || r.Y > 7 || r.Y < 0 || r.Equals(tileStart));
 
 		if (hasMoved == true)
@@ -142,14 +141,10 @@ public partial class WPawn : ChessPiece
 			listOfPotentialValidTiles.RemoveAll(r => r.Equals(new Vector2I(tileStart.X, tileStart.Y + 2 * direction)));
 		}
 
-		
-
 		foreach (Vector2I tile in listOfPotentialValidTiles)
 		{
 			Vector2I tempPos = tileMap.FromTileToGlobalPos(tile);
 
-
-			//TODO
 			if (!IsCollisionWithSameColor(tempPos) && !IsPieceInTheWay(tempPos, tileStart) && IsCheck(this.isWhite) == null)
 			{
 				return true;

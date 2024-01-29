@@ -60,7 +60,7 @@ public partial class WQueen : ChessPiece
 		foreach (Vector2I tile in listOfPotentialValidTiles)
 		{
 			Vector2 tempPos = tileMap.FromTileToGlobalPos(tile);
-			//TODO
+			
 			if (!IsPieceInTheWay(tempPos, tileStart) && (!IsCollision(tempPos) || IsCollisionWithOppositeColor(tempPos)) && IsCheck(isWhitesTurn) == null)
 			{
 				return true;

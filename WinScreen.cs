@@ -10,24 +10,23 @@ public partial class WinScreen : Control
 	{
 
 		gameOutcomeText = (RichTextLabel)GetNode("GameOutcomeText");
-		gameOutcomeText.PushFontSize(20);
 		if (ChessPiece.didWhiteCheckmate != null)
 		{
 			switch (ChessPiece.didWhiteCheckmate)
 			{
 				case false:
-					gameOutcomeText.PushFontSize(20);
-					gameOutcomeText.Text = " Black has won by checkmate! ";
+
+					gameOutcomeText.Text = "[font_size={20}][center]Black has won by checkmate!";
 					break;
 				case true:
-					gameOutcomeText.PushFontSize(20);
-					gameOutcomeText.Text = " White has won by checkmate! ";
+
+					gameOutcomeText.Text = "[font_size={20}][center]White has won by checkmate! ";
 					break;
 			}
 		}
 		else if (ChessPiece.didStalemateOccur == true)
 		{
-			gameOutcomeText.Text = " Stalemate :( ";
+			gameOutcomeText.Text = "[font_size={20}][center]Stalemate :( ";
 		}
 	}
 
@@ -39,7 +38,8 @@ public partial class WinScreen : Control
 	{
 		GetTree().Quit();
 	}
-	private void _on_game_outcome_text_finished()
+	private void _on_play_again_pressed()
 	{
+		GetTree().ChangeSceneToFile("res://ChessScenes/menu.tscn");
 	}
 }

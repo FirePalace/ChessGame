@@ -118,7 +118,7 @@ public partial class ChessPiece : Sprite2D
 					SetIfKingInCheck(!isWhitePiece, true);
 					ChessPiece checkingPiece = IsCheck(!isWhitePiece);
 					//? IsCheckmate
-					if (IsStalemate(isWhitePiece))
+					if (HasNoLegalMovesLeft(isWhitePiece))
 					{
 						didWhiteCheckmate = isWhitePiece;
 						GetTree().ChangeSceneToFile("res://ChessScenes/win_screen.tscn");
@@ -151,7 +151,7 @@ public partial class ChessPiece : Sprite2D
 					SpawnPromotionMenu(isWhitePiece);
 					DestroyPawnOnPromotion(tempPos);
 				}
-				if (IsStalemate(isWhitePiece))
+				if (HasNoLegalMovesLeft(isWhitePiece))
 				{
 					didStalemateOccur = true;
 					GetTree().ChangeSceneToFile("res://ChessScenes/win_screen.tscn");
@@ -195,7 +195,7 @@ public partial class ChessPiece : Sprite2D
 					CapturePiece(tempPos);
 					ChessPiece checkingPiece = IsCheck(!isWhitePiece);
 					//? IsCheckmate
-					if (IsStalemate(isWhitePiece))
+					if (HasNoLegalMovesLeft(isWhitePiece))
 					{
 						didWhiteCheckmate = isWhitePiece;
 						GetTree().ChangeSceneToFile("res://ChessScenes/win_screen.tscn");
@@ -233,7 +233,7 @@ public partial class ChessPiece : Sprite2D
 					SpawnPromotionMenu(isWhitePiece);
 					DestroyPawnOnPromotion(tempPos);
 				}
-				if (IsStalemate(isWhitePiece))
+				if (HasNoLegalMovesLeft(isWhitePiece))
 				{
 					didStalemateOccur = true;
 					GetTree().ChangeSceneToFile("res://ChessScenes/win_screen.tscn");
@@ -690,13 +690,13 @@ public partial class ChessPiece : Sprite2D
 					SetIfKingInCheck(!isWhite, true);
 					ChessPiece checkingPiece = IsCheck(!isWhite);
 					//? IsCheckmate
-					if (IsStalemate(isWhite))
+					if (HasNoLegalMovesLeft(isWhite))
 					{
 						didWhiteCheckmate = isWhite;
 						GetTree().ChangeSceneToFile("res://ChessScenes/win_screen.tscn");
 					}
 				}
-				if (IsStalemate(isWhite))
+				if (HasNoLegalMovesLeft(isWhite))
 				{
 					didStalemateOccur = true;
 					GetTree().ChangeSceneToFile("res://ChessScenes/win_screen.tscn");
@@ -706,7 +706,7 @@ public partial class ChessPiece : Sprite2D
 		}
 		return false;
 	}
-	public bool IsStalemate(bool isWhite)
+	public bool HasNoLegalMovesLeft(bool isWhite)
 	{
 		foreach (var oNode in node2D.GetChildren())
 		{
@@ -714,10 +714,7 @@ public partial class ChessPiece : Sprite2D
 			{
 				if (chessPiece.isWhite == !isWhite)
 				{
-					if (chessPiece.Position == new Vector2I(24, 8))
-					{
-						GD.Print("lol");
-					}
+				
 					if (chessPiece.HasValidMove())
 					{
 						return false;
