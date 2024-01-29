@@ -7,6 +7,7 @@ public partial class Menu : Control
 {
 	public static List<FENPiece> fenPieces = null;
 	public static List<Vector2I> castleVectors = new List<Vector2I>();
+	public static Vector2I enPassantVector;
 	private void _on_play_pressed()
 	{
 		on_fen_input_text_submitted("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
@@ -26,6 +27,7 @@ public partial class Menu : Control
 			['k'] = "King",
 			['p'] = "Pawn"
 		};
+
 
 		if (IsValidFEN(fen))
 		{
@@ -125,8 +127,39 @@ public partial class Menu : Control
 			}
 		}
 	}
-
+	private void ConvertStringToEnPassantVector(string enPassantSquare)
+	{
+		Dictionary<char, int> charToXCoordinate = new Dictionary<char, int>()
+		{
+			['a'] = 0,
+			['b'] = 1,
+			['c'] = 2,
+			['d'] = 3,
+			['e'] = 4,
+			['f'] = 5,
+			['g'] = 6,
+			['h'] = 7,
+		};
+		Vector2I tempVector = new Vector2I();
+		foreach (char c in enPassantSquare)
+		{
+			if (c == '-')
+			{
+				enPassantVector = new Vector2I(0, 0);
+			}
+			else if (char.IsLetter(c))
+			{
+				tempVector.X = charToXCoordinate[c];
+			}
+			else if (char.IsDigit(c))
+			{
+				tempVector.Y = c - '0';
+			}
+		}
+		enPassantVector = tempVector;
+	}
 }
+
 public struct FENPiece
 {
 	public string pieceType;

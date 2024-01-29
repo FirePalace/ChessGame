@@ -24,11 +24,7 @@ public partial class ChessPiece : Sprite2D
 	public static int fullMoveClock = 1;
 
 	// Called when the node enters the scene tree for the first time.
-	public override void _Ready()
-	{
-		node2D = GetNode<Node2D>("..");
-		tileMap = node2D.GetNode<TileMap>("Tilemap");
-	}
+	
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
 	public override void _Process(double delta)
@@ -467,6 +463,28 @@ public partial class ChessPiece : Sprite2D
 		}
 		throw new ArgumentException("King's position cannot be null");
 	}
+	public override void _Ready()
+	{
+		node2D = GetNode<Node2D>("..");
+		tileMap = node2D.GetNode<TileMap>("Tilemap");
+
+
+		if (Menu.enPassantVector != new Vector2I(0, 0))
+		{
+			enPassant.isWhite = isWhitesTurn;
+			enPassant.currentTile = Menu.enPassantVector;
+			if (enPassant.isWhite)
+			{
+				enPassant.chessPiece = GetEnPassantPiece(new Vector2I(Menu.enPassantVector.X, Menu.enPassantVector.Y + 1));
+			}
+			else
+			{
+				enPassant.chessPiece = GetEnPassantPiece(new Vector2I(Menu.enPassantVector.X, Menu.enPassantVector.Y - 1));
+			}
+
+		}
+
+	}
 	public void SpawnRedSquare(Sprite2D piece, Vector2I tilePosition)
 	{
 		node2D.CallDeferred("add_child", piece);
@@ -714,7 +732,7 @@ public partial class ChessPiece : Sprite2D
 			{
 				if (chessPiece.isWhite == !isWhite)
 				{
-				
+
 					if (chessPiece.HasValidMove())
 					{
 						return false;
@@ -767,7 +785,21 @@ public partial class ChessPiece : Sprite2D
 		return listOfTilesToCheck;
 
 	}
+	public WPawn GetEnPassantPiece(Vector2I tempTile)
+	{
+		foreach (var oNode in node2D.GetChildren())
+		{
+			if (oNode is WPawn pawn)
+			{
+				if (pawn.Position == tileMap.FromTileToGlobalPos(tempTile))
+				{
+					return pawn;
+				}
+			}
+		}
+		throw new ArgumentException("Pawn cannot be null;");
 
+	}
 }
 
 
