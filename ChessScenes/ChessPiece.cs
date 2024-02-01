@@ -6,6 +6,7 @@ using System.Collections.Generic;
 public partial class ChessPiece : Sprite2D
 {
 	public static TileMap tileMap;
+	private static RichTextLabel whoHasMove;
 	dragState IsDragging = dragState.unknown;
 	int placeInTileCallCount;
 	public Vector2I prevTile = new Vector2I(1, 1);
@@ -22,6 +23,7 @@ public partial class ChessPiece : Sprite2D
 	public static bool didStalemateOccur = false;
 	public static int halfMoveClock = 0;
 	public static int fullMoveClock = 1;
+	public static bool noMovesAllowedWhilePromoting = false;
 
 	// Called when the node enters the scene tree for the first time.
 
@@ -31,7 +33,8 @@ public partial class ChessPiece : Sprite2D
 	{
 		Vector2 MousePos = GetGlobalMousePosition();
 		Rect2 inBounds = new Rect2I(0, 0, 128, 128);
-		
+
+		// ChangeTextOfWhoHasMove();
 		// Does FEN have an EnPassant square?
 		if (Menu.enPassantVector != new Vector2I(0, 0))
 		{
@@ -47,6 +50,7 @@ public partial class ChessPiece : Sprite2D
 			}
 			Menu.enPassantVector = new Vector2I(0, 0);
 		}
+
 		if (IsDragging == dragState.isDragging)
 		{
 			this.Position = MousePos;
@@ -68,42 +72,50 @@ public partial class ChessPiece : Sprite2D
 			tempPos = tileMap.FromGlobalPosToTile((Vector2I)tempPos);
 			tempPos = tileMap.FromTileToGlobalPos((Vector2I)tempPos);
 
-			//Whites turn
-			if (isWhitesTurn)
+			if (!noMovesAllowedWhilePromoting)
 			{
-				if (this.isWhite == true && MoveHandling((Vector2I)tempPos, this.isWhite, isWhitesTurn))
+				//Whites turn
+				if (isWhitesTurn)
 				{
+					if (this.isWhite == true && MoveHandling((Vector2I)tempPos, this.isWhite, isWhitesTurn))
+					{
+					}
+					else if (this.isWhite == true && CaptureHandling((Vector2I)tempPos, this.isWhite, isWhitesTurn))
+					{
+					}
+					else
+					{
+						this.Position = tileMap.FromTileToGlobalPos(prevTile);
+					}
 				}
-				else if (this.isWhite == true && CaptureHandling((Vector2I)tempPos, this.isWhite, isWhitesTurn))
-				{
-				}
+				// Black's turn
 				else
 				{
-					this.Position = tileMap.FromTileToGlobalPos(prevTile);
+					if (this.isWhite == false && MoveHandling((Vector2I)tempPos, this.isWhite, isWhitesTurn))
+					{
+					}
+					else if (this.isWhite == false && CaptureHandling((Vector2I)tempPos, this.isWhite, isWhitesTurn))
+					{
+					}
+					else
+					{
+						this.Position = tileMap.FromTileToGlobalPos(prevTile);
+					}
+				}
+				if (enPassant.IsValid && enPassant.isWhite == isWhitesTurn)
+				{
+					enPassant.IsValid = false;
 				}
 			}
-			// Black's turn
 			else
 			{
-				if (this.isWhite == false && MoveHandling((Vector2I)tempPos, this.isWhite, isWhitesTurn))
-				{
-				}
-				else if (this.isWhite == false && CaptureHandling((Vector2I)tempPos, this.isWhite, isWhitesTurn))
-				{
-				}
-				else
-				{
-					this.Position = tileMap.FromTileToGlobalPos(prevTile);
-				}
+				this.Position = tileMap.FromTileToGlobalPos(prevTile);
 			}
-			if (enPassant.IsValid && enPassant.isWhite == isWhitesTurn)
+
+			if (IsDragging == dragState.isNotDragging)
 			{
-				enPassant.IsValid = false;
+				IsDragging = dragState.unknown;
 			}
-		}
-		if (IsDragging == dragState.isNotDragging)
-		{
-			IsDragging = dragState.unknown;
 		}
 	}
 
@@ -135,9 +147,9 @@ public partial class ChessPiece : Sprite2D
 						GetTree().ChangeSceneToFile("res://ChessScenes/win_screen.tscn");
 					}
 
-
 					if (IsPawnOnPromotionSquare())
 					{
+
 						SpawnPromotionMenu(isWhitePiece);
 						DestroyPawnOnPromotion(tempPos);
 					}
@@ -482,10 +494,7 @@ public partial class ChessPiece : Sprite2D
 	{
 		node2D = GetNode<Node2D>("..");
 		tileMap = node2D.GetNode<TileMap>("Tilemap");
-
-		//TODO
-
-
+		whoHasMove = node2D.GetNode<RichTextLabel>("WhoHasMove");
 	}
 	public void SpawnRedSquare(Sprite2D piece, Vector2I tilePosition)
 	{
@@ -565,10 +574,12 @@ public partial class ChessPiece : Sprite2D
 				Vector2 pawnTilePos = tileMap.FromGlobalPosToTile((Vector2I)pawn.Position);
 				if (pawnTilePos.Y == 0 && pawn.isWhite)
 				{
+					noMovesAllowedWhilePromoting = true;
 					return true;
 				}
 				if (pawnTilePos.Y == 7 && !pawn.isWhite)
 				{
+					noMovesAllowedWhilePromoting = true;
 					return true;
 				}
 			}
@@ -589,28 +600,28 @@ public partial class ChessPiece : Sprite2D
 					ChessPiece wQueen = new WQueen();
 					tileMap.SpawnPiece(wQueen, "wQueen", "white-queen", (Vector2I)tilePos);
 					HidePromotionMenu();
-					isWhitesTurn = !isWhitesTurn;
+					noMovesAllowedWhilePromoting = false;
 					break;
 				case 1:
 					GD.Print("White Rook");
 					ChessPiece wRook = new Rook();
 					tileMap.SpawnPiece(wRook, "wRook", "white-rook", (Vector2I)tilePos);
 					HidePromotionMenu();
-					isWhitesTurn = !isWhitesTurn;
+					noMovesAllowedWhilePromoting = false;
 					break;
 				case 2:
 					GD.Print("White Knight");
 					ChessPiece wKnight = new WKnight();
 					tileMap.SpawnPiece(wKnight, "wKnight", "white-knight", (Vector2I)tilePos);
 					HidePromotionMenu();
-					isWhitesTurn = !isWhitesTurn;
+					noMovesAllowedWhilePromoting = false;
 					break;
 				case 3:
 					GD.Print("White Bishop");
 					ChessPiece wBishop = new WBishop();
 					tileMap.SpawnPiece(wBishop, "wBishop", "white-bishop", (Vector2I)tilePos);
 					HidePromotionMenu();
-					isWhitesTurn = !isWhitesTurn;
+					noMovesAllowedWhilePromoting = false;
 					break;
 			}
 		}
@@ -623,28 +634,28 @@ public partial class ChessPiece : Sprite2D
 					ChessPiece bQueen = new WQueen();
 					tileMap.SpawnPiece(bQueen, "bQueen", "black-queen", (Vector2I)tilePos);
 					HidePromotionMenu();
-					isWhitesTurn = !isWhitesTurn;
+					noMovesAllowedWhilePromoting = false;
 					break;
 				case 1:
 					GD.Print("Black Rook");
 					ChessPiece bRook = new Rook();
 					tileMap.SpawnPiece(bRook, "bRook", "black-rook", (Vector2I)tilePos);
 					HidePromotionMenu();
-					isWhitesTurn = !isWhitesTurn;
+					noMovesAllowedWhilePromoting = false;
 					break;
 				case 2:
 					GD.Print("Black Knight");
 					ChessPiece bKnight = new WKnight();
 					tileMap.SpawnPiece(bKnight, "bKnight", "black-knight", (Vector2I)tilePos);
 					HidePromotionMenu();
-					isWhitesTurn = !isWhitesTurn;
+					noMovesAllowedWhilePromoting = false;
 					break;
 				case 3:
 					GD.Print("Black Bishop");
 					ChessPiece bBishop = new WBishop();
 					tileMap.SpawnPiece(bBishop, "bBishop", "black-bishop", (Vector2I)tilePos);
 					HidePromotionMenu();
-					isWhitesTurn = !isWhitesTurn;
+					noMovesAllowedWhilePromoting = false;
 					break;
 
 			}
@@ -716,7 +727,7 @@ public partial class ChessPiece : Sprite2D
 						GetTree().ChangeSceneToFile("res://ChessScenes/win_screen.tscn");
 					}
 				}
-				if (HasNoLegalMovesLeft(isWhite))
+				else if (HasNoLegalMovesLeft(isWhite))
 				{
 					didStalemateOccur = true;
 					GetTree().ChangeSceneToFile("res://ChessScenes/win_screen.tscn");
@@ -799,7 +810,21 @@ public partial class ChessPiece : Sprite2D
 				}
 			}
 		}
-		throw new ArgumentException("Pawn cannot be null;");
+		throw new ArgumentException("Pawn cannot be null");
+	}
+	public void ChangeTextOfWhoHasMove()
+	{
+		if (whoHasMove != null)
+		{
+			if (isWhitesTurn)
+			{
+				whoHasMove.Text = "[font_size={20}][center]Whites's turn";
+			}
+			else
+			{
+				whoHasMove.Text = "[font_size={20}][center]Blacks's turn";
+			}
+		}
 	}
 }
 

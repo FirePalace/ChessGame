@@ -47,13 +47,27 @@ public partial class Rook : ChessPiece
 			listOfPotentialValidTiles.Add(new Vector2I(tileStart.X, i));
 		}
 		listOfPotentialValidTiles.RemoveAll(r => r.Equals(tileStart));
-		
+
+	    // Is there a check? if there is save the checking piece and its Position
+		ChessPiece checkingPiece = IsCheck(this.isWhite);
+		Vector2I? checkingPieceTilePos = null;
+		if (checkingPiece != null)
+		{
+			checkingPieceTilePos = tileMap.FromGlobalPosToTile((Vector2I)checkingPiece.Position);
+		}
 		foreach (Vector2I tile in listOfPotentialValidTiles)
 		{
 			Vector2I tempPos = tileMap.FromTileToGlobalPos(tile);
 			if (!IsPieceInTheWay(tempPos, tileStart) && (!IsCollision(tempPos) || IsCollisionWithOppositeColor(tempPos)) && IsCheck(this.isWhite) == null)
 			{
 				return true;
+			}
+			if (checkingPiece != null)
+			{
+				if (tile == checkingPieceTilePos && IsCheck(this.isWhite) != null && !IsPieceInTheWay(checkingPiece.Position, tileStart) && IsCollisionWithOppositeColor(checkingPiece.Position))
+				{
+					return true;
+				}
 			}
 		}
 		return false;

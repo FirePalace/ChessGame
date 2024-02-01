@@ -136,6 +136,14 @@ public partial class WPawn : ChessPiece
 
 		listOfPotentialValidTiles.RemoveAll(r => r.X > 7 || r.X < 0 || r.Y > 7 || r.Y < 0 || r.Equals(tileStart));
 
+		// Is there a check? if there is save the checking piece and its Position
+		ChessPiece checkingPiece = IsCheck(this.isWhite);
+		Vector2I? checkingPieceTilePos = null;
+		if (checkingPiece != null)
+		{
+			checkingPieceTilePos = tileMap.FromGlobalPosToTile((Vector2I)checkingPiece.Position);
+		}
+
 		if (hasMoved == true)
 		{
 			listOfPotentialValidTiles.RemoveAll(r => r.Equals(new Vector2I(tileStart.X, tileStart.Y + 2 * direction)));
@@ -148,6 +156,13 @@ public partial class WPawn : ChessPiece
 			if (!IsCollisionWithSameColor(tempPos) && !IsPieceInTheWay(tempPos, tileStart) && IsCheck(this.isWhite) == null)
 			{
 				return true;
+			}
+			if (checkingPiece != null)
+			{
+				if (tile == checkingPieceTilePos && IsCheck(this.isWhite) != null && !IsPieceInTheWay(checkingPiece.Position, tileStart) && IsCollisionWithOppositeColor(checkingPiece.Position))
+				{
+					return true;
+				}
 			}
 		}
 

@@ -56,6 +56,14 @@ public partial class WQueen : ChessPiece
 		}
 
 		listOfPotentialValidTiles.RemoveAll(r => r.X > 7 || r.X < 0 || r.Y > 7 || r.Y < 0 || r.Equals(tileStart));
+		
+		// Is there a check? if there is save the checking piece and its Position
+		ChessPiece checkingPiece = IsCheck(this.isWhite);
+		Vector2I? checkingPieceTilePos = null;
+		if (checkingPiece != null)
+		{
+			checkingPieceTilePos = tileMap.FromGlobalPosToTile((Vector2I)checkingPiece.Position);
+		}
 
 		foreach (Vector2I tile in listOfPotentialValidTiles)
 		{
@@ -64,6 +72,13 @@ public partial class WQueen : ChessPiece
 			if (!IsPieceInTheWay(tempPos, tileStart) && (!IsCollision(tempPos) || IsCollisionWithOppositeColor(tempPos)) && IsCheck(isWhitesTurn) == null)
 			{
 				return true;
+			}
+			if (checkingPiece != null)
+			{
+				if (tile == checkingPieceTilePos && IsCheck(this.isWhite) != null && !IsPieceInTheWay(checkingPiece.Position, tileStart) && IsCollisionWithOppositeColor(checkingPiece.Position))
+				{
+					return true;
+				}
 			}
 
 		}

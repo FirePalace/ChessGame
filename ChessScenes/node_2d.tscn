@@ -12921,5 +12921,15 @@ popup/item_3/icon = ExtResource("20_ftv8a")
 popup/item_3/id = 3
 script = ExtResource("16_bor5x")
 
+[node name="WhoHasMove" type="RichTextLabel" parent="."]
+offset_left = -69.0
+offset_top = 55.0
+offset_right = 300.11
+offset_bottom = 90.0
+scale = Vector2(0.215, 0.215)
+bbcode_enabled = true
+fit_content = true
+scroll_active = false
+
 [connection signal="item_selected" from="WhitePromotion" to="WhitePromotion" method="_on_item_selected"]
 [connection signal="item_selected" from="BlackPromotion" to="BlackPromotion" method="_on_item_selected_black"]
